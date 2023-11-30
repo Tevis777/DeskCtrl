@@ -21,16 +21,12 @@ Motor Motor(PIN_MOTOR_SIGNAL);
 Button ButtonUp("Up", PIN_BUTTON_UP, OnButtonUp);
 Button ButtonDown("Up", PIN_BUTTON_DOWN, OnButtonDown);
 
-
-
 void setup() {
   SyslogInit();
   LedBoard.Init();
   ButtonUp.Init();
   ButtonDown.Init();
   Motor.Init();
-
-
 }
 
 void loop() {

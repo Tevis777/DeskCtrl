@@ -20,6 +20,8 @@ public:
   void Pool();
 
 private:
+  static Motor* s_instance;
+
   enum class EState
   {
     Starting,
@@ -30,11 +32,19 @@ private:
 
   static constexpr uint32_t START_TIME = 512; //[ms]
 
-  static constexpr uint32_t INIT_FREQ = 1024;
-  static constexpr uint32_t WORK_FREQ = 2048;
+  static constexpr uint32_t INIT_FREQ = 256;
+  static constexpr uint32_t WORK_FREQ = 1024;
+  static constexpr uint32_t PRESCALER = 256;
 
-  static constexpr uint32_t PWM_ON = UINT8_MAX / 2; //50% duty cycle
-  static constexpr uint32_t PWM_OFF = 0;
+  static uint32_t FreqToTimerVal(uint32_t freq);
+
+  static void OnTimerISR();
+  
+  void HandleTick();
+  void SetSpeed(uint32_t freq);
+
+
+
   
   uint8_t m_pin;
   uint32_t m_freq;
