@@ -6,6 +6,7 @@ Button::Button(const char* name, uint8_t pin, Handler handler) : m_name(name), m
 
 void Button::Init()
 {
+  SYSLOG("Button init (%s)", m_name);
   pinMode(m_pin, INPUT);
   m_prev = IsPressed();
 }

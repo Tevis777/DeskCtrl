@@ -16,13 +16,14 @@ void OnButtonDown(Button::Event event);
 
 uint32_t Counter = 0;
 
-Led LedBoard("Board", PIN_LED_BOARD, true);
+Led LedBoard("Board", PIN_LED_BOARD, false);
 Motor Motor(PIN_MOTOR_SIGNAL);
 Button ButtonUp("Up", PIN_BUTTON_UP, OnButtonUp);
 Button ButtonDown("Up", PIN_BUTTON_DOWN, OnButtonDown);
 
 void setup() {
   SyslogInit();
+  SYSLOG("Desk Controller startup --------------------");
   LedBoard.Init();
   ButtonUp.Init();
   ButtonDown.Init();
@@ -45,7 +46,10 @@ void loop() {
     ButtonDown.Pool();
   }
 
-  Motor.Pool();
+  if((Counter % 100) == 0)
+  {
+    Motor.Pool();
+  }
 
   delay(1);
 }

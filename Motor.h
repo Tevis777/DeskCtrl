@@ -30,7 +30,7 @@ private:
     Idle,
   };
 
-  static constexpr uint32_t START_TIME = 512; //[ms]
+  static constexpr uint32_t START_TIME = 1000; //[ms]
 
   static constexpr uint32_t INIT_FREQ = 256;
   static constexpr uint32_t WORK_FREQ = 1024;
@@ -48,7 +48,7 @@ private:
   
   uint8_t m_pin;
   uint32_t m_freq;
-  EState m_state;
+  EState m_state = EState::Idle;
 };
 
 #endif // _MOTOR_H_
