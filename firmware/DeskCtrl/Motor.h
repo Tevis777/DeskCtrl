@@ -12,7 +12,7 @@ public:
     Left
   };
 
-  Motor(uint8_t pin);
+  Motor(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull);
 
   void Init();
   void Start(Dir dir);
@@ -30,10 +30,16 @@ private:
     Idle,
   };
 
-  static constexpr uint32_t START_TIME = 1000; //[ms]
+  static constexpr uint32_t START_TIME = 10 * 1000; //[ms]
 
-  static constexpr uint32_t INIT_FREQ = 256;
-  static constexpr uint32_t WORK_FREQ = 1024;
+  static constexpr uint32_t FREQ_DIV_32 = (12 * 1024);
+  static constexpr uint32_t FREQ_DIV_16 = (6 * 1024);
+  static constexpr uint32_t FREQ_DIV_8 = (3 * 1024);
+  static constexpr uint32_t FREQ_DIV_4 = (3 * 512);
+  static constexpr uint32_t FREQ = 5 * 128;
+
+  static constexpr uint32_t INIT_FREQ = 512;
+  static constexpr uint32_t WORK_FREQ = 512;
   static constexpr uint32_t PRESCALER = 256;
 
   static uint32_t FreqToTimerVal(uint32_t freq);
@@ -46,7 +52,9 @@ private:
 
 
   
-  uint8_t m_pin;
+  uint8_t m_pinPull;
+  uint8_t m_pinEn;
+  uint8_t m_pinDir;
   uint32_t m_freq;
   EState m_state = EState::Idle;
 };

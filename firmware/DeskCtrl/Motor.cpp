@@ -9,7 +9,7 @@ void Motor::OnTimerISR()
   s_instance->HandleTick();
 }
 
-Motor::Motor(uint8_t pin) : m_pin(pin)
+Motor::Motor(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull) : m_pinEn(pinEn), m_pinDir(pinDir), m_pinPull(pinPull)
 {
   s_instance = this;
 }
@@ -17,8 +17,12 @@ Motor::Motor(uint8_t pin) : m_pin(pin)
 void Motor::Init()
 {
   SYSLOG("Motor init");
-  pinMode(m_pin, OUTPUT);
-  digitalWrite(m_pin, LOW);
+  pinMode(m_pinPull, OUTPUT);
+  pinMode(m_pinDir, OUTPUT);
+  pinMode(m_pinEn, OUTPUT);
+  digitalWrite(m_pinPull, LOW);
+  digitalWrite(m_pinDir, HIGH); //low==right
+  digitalWrite(m_pinEn, HIGH);
   timer1_attachInterrupt(OnTimerISR);
   timer1_disable();
 
@@ -34,6 +38,14 @@ void Motor::Start(Dir dir)
 {
   if(m_state != EState::Idle)
     return;
+
+  if(dir == Dir::Right)
+    digitalWrite(m_pinDir, HIGH);
+  else
+    digitalWrite(m_pinDir, LOW);
+    
+    
+
 
   SYSLOG("Motor start");
   m_state = EState::Starting;
@@ -52,7 +64,7 @@ void Motor::Stop()
 
 void Motor::HandleTick()
 {
-  digitalWrite(m_pin, digitalRead(m_pin) ? LOW : HIGH);
+  digitalWrite(m_pinPull, digitalRead(m_pinPull) ? LOW : HIGH);
 }
 
 uint32_t Motor::FreqToTimerVal(uint32_t freq)
@@ -65,10 +77,12 @@ void Motor::SetSpeed(uint32_t freq)
   if(freq == 0)
   {
     timer1_disable(); //Disable interrupt
-    digitalWrite(m_pin, LOW);
+    digitalWrite(m_pinPull, LOW);
+    digitalWrite(m_pinEn, HIGH);
   }
   else
   {
+    digitalWrite(m_pinEn, LOW);
     timer1_write(FreqToTimerVal(freq));
     timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
   }
@@ -78,7 +92,7 @@ void Motor::Pool() //Every 10ms
 {
   if(m_state == EState::Starting)
   {
-    m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / 100);
+    m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / 10);
 
     SetSpeed(m_freq);
 
@@ -92,7 +106,7 @@ void Motor::Pool() //Every 10ms
 
   if(m_state == EState::Stopping)
   {
-    m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / 100);
+    m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / 10);
 
     SetSpeed(m_freq);
 
