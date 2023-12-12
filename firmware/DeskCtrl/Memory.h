@@ -8,15 +8,9 @@ class Memory
 public:
   static constexpr uint32_t SIZE = 1024;
 
-  enum class Map
-  {
-    Config = 0,
-    Position = 128
-  };
-
-  void Init(void);
-  bool Save(uint32_t addr, const uint8_t* data, uint32_t size);
-  bool Load(uint32_t addr, uint8_t* data, uint32_t size);
+  static void Init(void);
+  static bool Save(uint32_t addr, const void* data, uint32_t size);
+  static bool Load(uint32_t addr, void* data, uint32_t size);
 
 private:
 };

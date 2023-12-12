@@ -6,18 +6,22 @@
 class Motor
 {
 public:
-  enum class Dir
+  enum class EDir
   {
-    Right,
-    Left
+    Down,
+    Up
   };
 
   Motor(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull);
 
   void Init();
-  void Start(Dir dir);
+  void Start(EDir dir);
   void Stop();
   void Pool();
+
+  void GoTo(uint32_t height);
+
+  
 
 private:
   static Motor* s_instance;
@@ -29,6 +33,15 @@ private:
     Stopping,
     Idle,
   };
+
+
+  static constexpr uint32_t HEIGHT_MAX = 120; //[cm]
+  static constexpr uint32_t HEIGHT_MIN = 70; //[cm]
+
+  static constexpr uint32_t TOTAL_STEPS = 44800;
+
+  static constexpr uint32_t STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN));
+
 
   static constexpr uint32_t START_TIME = 1000; //[ms]
 
@@ -49,13 +62,26 @@ private:
   void HandleTick();
   void SetSpeed(uint32_t freq);
 
+  volatile uint32_t m_pos;
+  uint32_t m_selectedPos;
 
+  uint32_t PosToHeight(uint32_t pos);
+  uint32_t HeightToPos(uint32_t height);
 
-  
+  const char* GetDirStr();
+
+  void StepperSetup();
+  void StepperSetEn(bool enabled);
+  void StepperSetDir(EDir dir);
+  void StepperPull();
+  void ResetPos();
+
+  EDir m_dir;
   uint8_t m_pinPull;
   uint8_t m_pinEn;
   uint8_t m_pinDir;
   uint32_t m_freq;
+  
   EState m_state = EState::Idle;
 };
 

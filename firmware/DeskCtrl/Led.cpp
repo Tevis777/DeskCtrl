@@ -17,13 +17,16 @@ void Led::Init()
 
 void Led::On()
 {
-  SYSLOG("Led on (%s)", m_name);
+  if(m_log)
+    SYSLOG("Led on (%s)", m_name);
   digitalWrite(m_pin, HIGH);
 }
 
 void Led::Off()
 {
-  SYSLOG("Led off (%s)", m_name);
+  if(m_log)
+    SYSLOG("Led off (%s)", m_name);
+    
   digitalWrite(m_pin, LOW);
 }
 
