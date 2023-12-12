@@ -30,7 +30,7 @@ private:
     Idle,
   };
 
-  static constexpr uint32_t START_TIME = 1 * 1000; //[ms]
+  static constexpr uint32_t START_TIME = 1000; //[ms]
 
   static constexpr uint32_t FREQ_DIV_32 = (12 * 1024);
   static constexpr uint32_t FREQ_DIV_16 = (6 * 1024);
@@ -38,8 +38,8 @@ private:
   static constexpr uint32_t FREQ_DIV_4 = (3 * 512);
   static constexpr uint32_t FREQ = 5 * 128;
 
-  static constexpr uint32_t INIT_FREQ = 2 * 1024;
-  static constexpr uint32_t WORK_FREQ = 8 * 1024;
+  static constexpr uint32_t INIT_FREQ = 128;
+  static constexpr uint32_t WORK_FREQ = 896;
   static constexpr uint32_t PRESCALER = 256;
 
   static uint32_t FreqToTimerVal(uint32_t freq);

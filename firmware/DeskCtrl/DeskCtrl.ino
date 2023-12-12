@@ -2,6 +2,7 @@
 #include "Syslog.h"
 #include "Button.h"
 #include "Motor.h"
+#include "Memory.h"
 
 //GPIO profile
 #define PIN_BUTTON_UP (D1)
@@ -25,14 +26,17 @@ Led LedBoard("Board", PIN_LED_BOARD, false);
 Motor Motor(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
 Button ButtonUp("Up", PIN_BUTTON_UP, OnButtonUp);
 Button ButtonDown("Up", PIN_BUTTON_DOWN, OnButtonDown);
+Memory Memory(1024);
 
 void setup() {
   SyslogInit();
   SYSLOG("Desk Controller startup --------------------");
+  Memory.Init();
   LedBoard.Init();
   ButtonUp.Init();
   ButtonDown.Init();
   Motor.Init();
+
 }
 
 void loop() {
