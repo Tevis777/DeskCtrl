@@ -2,11 +2,9 @@
 #include <EEPROM.h>
 #include <Arduino.h>
 
-Memory::Memory(uint32_t size) : m_size(size) {};
-
 void Memory::Init(void)
 {
-  EEPROM.begin(m_size);
+  EEPROM.begin(SIZE);
   delay(100);
 }
 
@@ -14,7 +12,7 @@ bool Memory::Save(uint32_t addr, const uint8_t* data, uint32_t size)
 {
   int32_t i;
 
-  if((addr + size) >= m_size)
+  if((addr + size) >= SIZE)
     return false;
 
   for(i = 0; i < size; i++)
@@ -31,7 +29,7 @@ bool Memory::Load(uint32_t addr, uint8_t* data, uint32_t size)
 {
   int32_t i;
 
-  if((addr + size) >= m_size)
+  if((addr + size) >= SIZE)
     return false;
 
   for(i = 0; i < size; i++)

@@ -26,12 +26,12 @@ Led LedBoard("Board", PIN_LED_BOARD, false);
 Motor Motor(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
 Button ButtonUp("Up", PIN_BUTTON_UP, OnButtonUp);
 Button ButtonDown("Up", PIN_BUTTON_DOWN, OnButtonDown);
-Memory Memory(1024);
+Memory Memory();
 
 void setup() {
   SyslogInit();
   SYSLOG("Desk Controller startup --------------------");
-  Memory.Init();
+  // Memory.Init();
   LedBoard.Init();
   ButtonUp.Init();
   ButtonDown.Init();
