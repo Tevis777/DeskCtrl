@@ -109,14 +109,19 @@ void Motor::SetSpeed(uint32_t freq)
 
 void Motor::Pool() //Every 10ms
 {
-  if((m_state == EState::Idle) || (m_state == EState::Running))
+  if(m_selectedPos != UINT32_MAX)
   {
-    if((m_dir == EDir::Up) && (m_pos >= m_selectedPos))
-      Stop();
+    if((m_state == EState::Idle) || (m_state == EState::Running))
+    {
+      if((m_dir == EDir::Up) && (m_pos >= m_selectedPos))
+        Stop();
 
-    if((m_dir == EDir::Down) && (m_pos <= m_selectedPos))
-      Stop();
+      if((m_dir == EDir::Down) && (m_pos <= m_selectedPos))
+        Stop();
+    }
   }
+
+
 
   if(m_state == EState::Starting)
   {

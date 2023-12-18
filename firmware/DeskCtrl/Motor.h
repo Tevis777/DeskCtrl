@@ -63,7 +63,7 @@ private:
   void SetSpeed(uint32_t freq);
 
   volatile uint32_t m_pos;
-  uint32_t m_selectedPos;
+  uint32_t m_selectedPos = UINT32_MAX;
 
   uint32_t PosToHeight(uint32_t pos);
   uint32_t HeightToPos(uint32_t height);

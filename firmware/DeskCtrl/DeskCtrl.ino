@@ -66,20 +66,21 @@ void loop() {
   delay(1);
 }
 
+
 void OnButtonUp(Button::Event event)
 {
   switch(event)
   {
     case Button::Event::Pressed:
     {
-      //Motor.Start(Motor::EDir::Up);
-      Motor.GoTo(90);
+      Motor.Start(Motor::EDir::Up);
+      //Motor.GoTo(90);
       return;
     }
     case Button::Event::Released:
     default:
     {
-      //Motor.Stop();
+      Motor.Stop();
       return;
     }
   }
@@ -91,14 +92,14 @@ void OnButtonDown(Button::Event event)
   {
     case Button::Event::Pressed:
     {
-      //Motor.Start(Motor::EDir::Down);
-      Motor.GoTo(85);
+      Motor.Start(Motor::EDir::Down);
+      //Motor.GoTo(85);
       return;
     }
     case Button::Event::Released:
     default:
     {
-      //Motor.Stop();
+      Motor.Stop();
       return;
     }
   }
