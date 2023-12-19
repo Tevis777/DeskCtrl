@@ -49,11 +49,11 @@ void loop() {
 
   if((Counter % 1000) == 0)
   {
-    LedBoard.Toggle();
+    
   }
 
   if((Counter % 100) == 0)
-  {
+  {LedBoard.Toggle();
     ButtonUp.Pool();
     ButtonDown.Pool();
   }
