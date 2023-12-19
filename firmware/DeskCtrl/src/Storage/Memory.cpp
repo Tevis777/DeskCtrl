@@ -10,20 +10,20 @@ void Memory::Init(void)
 
 bool Memory::Save(uint32_t addr, const void* data, uint32_t size)
 {
-  const uint8_t* ptr = static_cast<const uint8_t*>(data);
-  int32_t i;
+    const uint8_t* ptr = static_cast<const uint8_t*>(data);
+    int32_t i;
 
-  if((addr + size) >= SIZE)
+    if((addr + size) >= SIZE)
     return false;
 
-  for(i = 0; i < size; i++)
-  {
+    for(i = 0; i < size; i++)
+    {
     EEPROM.write(addr + i, ptr[i]);
-  }
+    }
 
-  EEPROM.commit();
+    EEPROM.commit();
 
-  return false;
+    return false;
 }
 
 bool Memory::Load(uint32_t addr, void* data, uint32_t size)

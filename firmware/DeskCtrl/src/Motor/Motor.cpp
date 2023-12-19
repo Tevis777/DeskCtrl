@@ -1,197 +1,199 @@
 #include "Motor.h"
 #include "Arduino.h"
 #include "../Syslog/Syslog.h"
-
 #include "../DeskCtrl.h"
 
 Motor* Motor::s_instance = nullptr;
 
 void Motor::OnTimerISR()
 {
-  s_instance->HandleTick();
+    s_instance->HandleTick();
 }
-
-
 
 void Motor::Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
 {
-  s_instance = this;
+    s_instance = this;
 
-  m_pinEn = pinEn;
-  m_pinDir = pinDir;
-  m_pinPull = pinPull;
+    m_pinEn = pinEn;
+    m_pinDir = pinDir;
+    m_pinPull = pinPull;
 
-  StepperSetup();
-  timer1_attachInterrupt(OnTimerISR);
-  timer1_disable();
+    PhySetup();
 
-  SYSLOG("Motor init (position: %u/%u)", PosToHeight(m_pos), m_pos);
-}
+    timer1_attachInterrupt(OnTimerISR);
+    timer1_disable();
 
-void Motor::GoTo(uint32_t height)
-{
-  m_selectedPos = HeightToPos(height);
-
-  if(m_selectedPos == m_pos)
-    return;
-
-  if(m_selectedPos > m_pos)
-    Start(EDir::Up);
-  else
-    Start(EDir::Down);
-
+    SYSLOG("Motor init (position: %u/%u)", PosToHeight(m_position), m_position);
 }
 
 void Motor::Calibrate(uint32_t position)
 {
-  m_pos = position;
+    m_position = position;
+}
+
+void Motor::StartDst(uint32_t height)
+{
+    m_selectedPos = HeightToPos(height);
+
+    if(m_selectedPos == m_position)
+        return;
+
+    if(m_selectedPos > m_position)
+    {
+        Start(EDir::Up);
+    }
+    else
+    {
+        Start(EDir::Down);
+    }
+}
+
+void Motor::StartManual(EDir dir)
+{
+    m_selectedPos = UINT32_MAX;
+    Start(dir);
 }
 
 
 void Motor::Start(EDir dir)
 {
-  if(m_state != EState::Idle)
-    return;
+    if(m_state != EState::Idle)
+        return;
 
 
-  m_dir = dir;
-  m_state = EState::Starting;
-  m_freq = INIT_FREQ;
-  SYSLOG("Motor start (%s - %u->%u)", GetDirStr(), m_pos, m_selectedPos);
-  StepperSetDir(m_dir);
-  SetSpeed(INIT_FREQ);
+    m_dir = dir;
+    m_state = EState::Starting;
+    m_freq = INIT_FREQ;
+    PhySetDir(m_dir);
+    SetSpeed(INIT_FREQ);
 
-  DeskCtrl::GetInstance()->OnMotorStart();
+    DeskCtrl::GetInstance()->OnMotorStart();
 }
 
 void Motor::Stop()
 {
-  if(m_state == EState::Idle)
-    return;
+    if(m_state == EState::Idle)
+        return;
 
-  SYSLOG("Motor stop");
-  m_state = EState::Stopping;
+    m_state = EState::Stopping;
 }
 
 void Motor::HandleTick()
 {
-  digitalWrite(m_pinPull, digitalRead(m_pinPull) ? LOW : HIGH);
+    PhyPull();
 
-  if(m_dir == EDir::Down)
-    m_pos--;
-  else
-    m_pos++;
+    if(m_dir == EDir::Down)
+    {
+        m_position--;
+    }
+    else
+    {
+        m_position++;
+    }
 }
 
 uint32_t Motor::FreqToTimerVal(uint32_t freq)
 {
-  return ((F_CPU / PRESCALER) / freq);
+    return ((F_CPU / PRESCALER) / freq);
 }
 
 void Motor::SetSpeed(uint32_t freq)
 {
-  if(freq == 0)
-  {
-    timer1_disable(); //Disable interrupt
-    StepperSetEn(false);
-  }
-  else
-  {
-    StepperSetEn(true);
-    timer1_write(FreqToTimerVal(freq));
-    timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
-  }
+    if(freq == 0)
+    {
+        timer1_disable(); //Disable interrupt
+        PhyEnable(false);
+    }
+    else
+    {
+        PhyEnable(true);
+        timer1_write(FreqToTimerVal(freq));
+        timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
+    }
 }
 
-void Motor::Pool() //Every 10ms
+void Motor::Pool(uint32_t interval)
 {
-  if(m_selectedPos != UINT32_MAX)
-  {
-    if((m_state == EState::Idle) || (m_state == EState::Running))
+    if(m_selectedPos != UINT32_MAX) //Handle selected position
     {
-      if((m_dir == EDir::Up) && (m_pos >= m_selectedPos))
-        Stop();
+        if((m_state == EState::Idle) || (m_state == EState::Running))
+        {
+            if((m_dir == EDir::Up) && (m_position >= m_selectedPos))
+                Stop();
 
-      if((m_dir == EDir::Down) && (m_pos <= m_selectedPos))
-        Stop();
+            if((m_dir == EDir::Down) && (m_position <= m_selectedPos))
+                Stop();
+        }
     }
-  }
 
-
-
-  if(m_state == EState::Starting)
-  {
-    m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / 10);
-
-    SetSpeed(m_freq);
-
-    SYSLOG("FREQ: %u", m_freq);
-
-    if(m_freq >= WORK_FREQ)
+    if(m_state == EState::Starting) //Handle soft start
     {
-      m_state = EState::Running;
+        m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
+
+        SetSpeed(m_freq);
+
+        if(m_freq >= WORK_FREQ)
+        {
+            m_state = EState::Running;
+        }
     }
-  }
 
-  if(m_state == EState::Stopping)
-  {
-    m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / 10);
-
-    SetSpeed(m_freq);
-
-    SYSLOG("FREQ: %u", m_freq);
-
-    if(m_freq <= INIT_FREQ)
+    if(m_state == EState::Stopping) //Handle soft stop
     {
-      SetSpeed(0);
-      m_state = EState::Idle;
+        m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
 
-      uint32_t val = m_pos;
-      
-      SYSLOG("Position: %u/%u", PosToHeight(m_pos), m_pos);
-      DeskCtrl::GetInstance()->OnMotorStop(m_pos);
+        SetSpeed(m_freq);
+
+        if(m_freq <= INIT_FREQ)
+        {
+            SetSpeed(0);
+            m_state = EState::Idle;
+            DeskCtrl::GetInstance()->OnMotorStop(m_position);
+        }
     }
-  }
 }
 
 uint32_t Motor::PosToHeight(uint32_t pos)
 {
-  return HEIGHT_MIN + (pos / STEPS_PER_CM);
+    return HEIGHT_MIN + (pos / STEPS_PER_CM);
 }
 
 uint32_t Motor::HeightToPos(uint32_t height)
 {
-  return (height - HEIGHT_MIN) * STEPS_PER_CM;
+    return (height - HEIGHT_MIN) * STEPS_PER_CM;
 }
 
 const char* Motor::GetDirStr()
 {
-  return m_dir == EDir::Down ? "Down" : "Up";
+    return (m_dir == EDir::Down) ? "Down" : "Up";
 }
 
 
-void Motor::StepperSetup()
+/*****************************************************************************************************************/
+/*                                                   PHYSICAL                                                    */
+/*****************************************************************************************************************/
+void Motor::PhySetup()
 {
-  pinMode(m_pinPull, OUTPUT);
-  pinMode(m_pinDir, OUTPUT);
-  pinMode(m_pinEn, OUTPUT);
+    pinMode(m_pinPull, OUTPUT);
+    pinMode(m_pinDir, OUTPUT);
+    pinMode(m_pinEn, OUTPUT);
 
-  StepperSetEn(false);
+    PhyEnable(false);
 }
 
-void Motor::StepperSetEn(bool enabled)
+void Motor::PhyEnable(bool enabled)
 {
-  digitalWrite(m_pinEn, enabled ? LOW : HIGH);
+    digitalWrite(m_pinEn, enabled ? LOW : HIGH);
 }
 
-void Motor::StepperSetDir(EDir dir)
+void Motor::PhySetDir(EDir dir)
 {
-  digitalWrite(m_pinDir, dir == EDir::Down ? LOW : HIGH);
+    digitalWrite(m_pinDir, dir == EDir::Down ? LOW : HIGH);
 }
 
-void Motor::StepperPull()
+void Motor::PhyPull()
 {
-  digitalWrite(m_pinPull, digitalRead(m_pinPull) ? LOW : HIGH);
+    digitalWrite(m_pinPull, digitalRead(m_pinPull) ? LOW : HIGH);
 }
 
 

@@ -83,7 +83,7 @@ void DeskCtrl::Process()
 
     if((counter % 10) == 0)
     {
-        m_motor.Pool();
+        m_motor.Pool(10);
     }
 }
 
