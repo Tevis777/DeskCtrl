@@ -11,8 +11,6 @@
 class DeskCtrl
 {
 public:
-    DeskCtrl();
-    
     static DeskCtrl* GetInstance();
 
     //Main control

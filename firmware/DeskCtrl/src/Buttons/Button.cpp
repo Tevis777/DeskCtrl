@@ -2,10 +2,12 @@
 #include "Arduino.h"
 #include "../Syslog/Syslog.h"
 
-Button::Button(const char* name, uint8_t pin, Handler handler) : m_name(name), m_pin(pin), m_handler(handler) {}
-
-void Button::Init()
+void Button::Init(const char* name, uint8_t pin, Handler handler)
 {
+  m_name = name;
+  m_pin = pin;
+  m_handler = handler;
+
   SYSLOG("Button init (%s)", m_name);
   pinMode(m_pin, INPUT);
   m_prev = IsPressed();

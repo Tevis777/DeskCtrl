@@ -28,33 +28,6 @@ DeskCtrl* DeskCtrl::GetInstance()
 /*****************************************************************************************************************/
 /*                                                     INIT                                                      */
 /*****************************************************************************************************************/
-DeskCtrl::DeskCtrl() : 
-
-    m_buttonUp("Up", PIN_BUTTON_UP,
-        [this](Button::Event evt)
-        {
-            if(evt == Button::Event::Pressed)
-                this->OnUpButtonPressed();
-            else
-                this->OnUpButtonReleased();
-        }
-    ), 
-
-    m_buttonDown("Down", PIN_BUTTON_DOWN, [this](Button::Event evt)
-        {
-            if(evt == Button::Event::Pressed)
-                this->OnDownButtonPressed();
-            else
-                this->OnDownButtonReleased();
-        }
-    ),
-
-    m_ledBoard("Board", PIN_LED_BOARD, false)
-
-{
-
-};
-
 void DeskCtrl::Init()
 {
   SyslogInit();
@@ -71,11 +44,22 @@ void DeskCtrl::Init()
 
   m_motor.Init(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
   m_motor.Calibrate(position);
+  m_ledBoard.Init("Board", PIN_LED_BOARD, false);
+  m_buttonUp.Init("Up", PIN_BUTTON_UP, [this](Button::Event evt)
+                                        {
+                                            if(evt == Button::Event::Pressed)
+                                                this->OnUpButtonPressed();
+                                            else
+                                                this->OnUpButtonReleased();
+                                        });
 
-  m_ledBoard.Init();
-  m_buttonUp.Init();
-  m_buttonDown.Init();
-
+  m_buttonDown.Init("Down", PIN_BUTTON_DOWN, [this](Button::Event evt)
+                                        {
+                                            if(evt == Button::Event::Pressed)
+                                                this->OnDownButtonPressed();
+                                            else
+                                                this->OnDownButtonReleased();
+                                        });
 }
 
 /*****************************************************************************************************************/

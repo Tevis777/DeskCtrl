@@ -6,9 +6,7 @@
 class Led
 {
 public:
-  Led(const char* name, uint8_t pin, bool log);
-
-  void Init();
+  void Init(const char* name, uint8_t pin, bool log);
   void On();
   void Off();
   void Toggle();

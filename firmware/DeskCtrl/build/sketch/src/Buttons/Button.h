@@ -16,9 +16,7 @@ public:
 
   using Handler = std::function<void(Event)>;
 
-  Button(const char* name, uint8_t pin, Handler handler);
-
-  void Init();
+  void Init(const char* name, uint8_t pin, Handler handler);
   void Pool();
   bool IsPressed();
 

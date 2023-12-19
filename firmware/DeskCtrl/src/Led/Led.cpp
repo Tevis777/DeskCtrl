@@ -2,15 +2,17 @@
 #include "Arduino.h"
 #include "../Syslog/Syslog.h"
 
-Led::Led(const char* name, uint8_t pin, bool log) : m_name(name), m_pin(pin), m_log(log) {}
-
 const char* Led::GetName()
 {
   return m_name;
 }
 
-void Led::Init()
+void Led::Init(const char* name, uint8_t pin, bool log)
 {
+  m_name = name;
+  m_pin = pin;
+  m_log = log;
+
   SYSLOG("Led init (%s)", m_name);
   pinMode(m_pin, OUTPUT);
 }
