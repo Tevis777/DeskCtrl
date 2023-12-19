@@ -127,7 +127,7 @@ void DeskCtrl::OnMotorStop(uint32_t position)
 /*****************************************************************************************************************/
 void DeskCtrl::CmdDeskGoUp()
 {
-    m_motor.Start(Motor::EDir::Up);
+    m_motor.StartManual(Motor::EDir::Up);
 }
 
 void DeskCtrl::CmdDeskGoUpToNextLevel()
@@ -137,7 +137,7 @@ void DeskCtrl::CmdDeskGoUpToNextLevel()
 
 void DeskCtrl::CmdDeskGoDown()
 {
-    m_motor.Start(Motor::EDir::Down);
+    m_motor.StartManual(Motor::EDir::Down);
 }
 
 void DeskCtrl::CmdDeskGoDownToNextLevel()

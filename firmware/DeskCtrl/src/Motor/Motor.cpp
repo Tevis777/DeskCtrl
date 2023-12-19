@@ -33,49 +33,29 @@ void Motor::Calibrate(uint32_t position)
 
 void Motor::StartDst(uint32_t height)
 {
-    m_selectedPos = HeightToPos(height);
-
-    if(m_selectedPos == m_position)
-        return;
-
-    if(m_selectedPos > m_position)
-    {
-        Start(EDir::Up);
-    }
-    else
-    {
-        Start(EDir::Down);
-    }
+    Request req;
+    req.type = EState::Starting;
+    req.dir = EDir::Unknown;
+    req.position = HeightToPos(height);
+    m_request = std::make_shared<Request>(req);
 }
 
 void Motor::StartManual(EDir dir)
 {
-    m_selectedPos = UINT32_MAX;
-    Start(dir);
-}
-
-
-void Motor::Start(EDir dir)
-{
-    if(m_state != EState::Idle)
-        return;
-
-
-    m_dir = dir;
-    m_state = EState::Starting;
-    m_freq = INIT_FREQ;
-    PhySetDir(m_dir);
-    SetSpeed(INIT_FREQ);
-
-    DeskCtrl::GetInstance()->OnMotorStart();
+    Request req;
+    req.type = EState::Starting;
+    req.dir = dir;
+    req.position = UINT32_MAX;
+    m_request = std::make_shared<Request>(req);
 }
 
 void Motor::Stop()
 {
-    if(m_state == EState::Idle)
-        return;
-
-    m_state = EState::Stopping;
+    Request req;
+    req.type = EState::Stopping;
+    req.dir = EDir::Unknown;
+    req.position = UINT32_MAX;
+    m_request = std::make_shared<Request>(req);
 }
 
 void Motor::HandleTick()
@@ -114,15 +94,64 @@ void Motor::SetSpeed(uint32_t freq)
 
 void Motor::Pool(uint32_t interval)
 {
+    if(m_request) //Handle external request
+    {
+        EDir reqDir;
+
+        if(m_request->position == UINT32_MAX)
+        {
+            reqDir = m_request->dir;
+        }
+        else
+        {
+            reqDir = (m_request->position > m_position) ? EDir::Up : EDir::Down;
+        }
+
+        if(m_request->type == EState::Starting) //Request to start drive
+        {
+            if(m_state == EState::Idle) //Motor is idle
+            {
+                m_selectedPos = m_request->position;
+                m_dir = reqDir;
+                m_state = EState::Starting;
+                m_freq = INIT_FREQ;
+                PhySetDir(m_dir);
+                SetSpeed(INIT_FREQ);
+                m_request = {};
+            }
+            else //Motor is running
+            {
+                if(reqDir == m_dir) //Direction matches, update position
+                {
+                    m_selectedPos = m_request->position;
+                    m_request = {};
+                }
+                else //Direction mismatch, wait until stopped
+                {
+                    m_state = EState::Stopping;
+                }
+            }
+        }
+        else if(m_request->type == EState::Stopping) 
+        {
+            if(m_state != EState::Idle)
+            {
+                m_state = EState::Stopping;
+            }
+
+            m_request = {};
+        }
+    }    
+
     if(m_selectedPos != UINT32_MAX) //Handle selected position
     {
         if((m_state == EState::Idle) || (m_state == EState::Running))
         {
             if((m_dir == EDir::Up) && (m_position >= m_selectedPos))
-                Stop();
+                m_state = EState::Stopping;
 
             if((m_dir == EDir::Down) && (m_position <= m_selectedPos))
-                Stop();
+                m_state = EState::Stopping;
         }
     }
 
