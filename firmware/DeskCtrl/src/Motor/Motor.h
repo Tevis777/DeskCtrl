@@ -12,15 +12,14 @@ public:
     Up
   };
 
-  Motor(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull);
-
-  void Init();
+  void Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull);
   void Start(EDir dir);
   void Stop();
   void Pool();
 
   void GoTo(uint32_t height);
 
+  void Calibrate(uint32_t position);
   
 
 private:
@@ -75,6 +74,7 @@ private:
   void StepperSetDir(EDir dir);
   void StepperPull();
   void ResetPos();
+  
 
   EDir m_dir;
   uint8_t m_pinPull;

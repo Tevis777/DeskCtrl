@@ -52,4 +52,10 @@ C:\Workspace\DeskCtrl\firmware\DeskCtrl\build\sketch\src\Motor\Motor.cpp.o: \
  C:\Users\Adam\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\3.1.2\variants\nodemcu/pins_arduino.h \
  c:\users\adam\appdata\local\arduino15\packages\esp8266\hardware\esp8266\3.1.2\variants\generic\common.h \
  c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\syslog\syslog.h \
- c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\memory\memory.h
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\memory\memory.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\deskctrl.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\Buttons/Button.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\Motor/Motor.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\Led/Led.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\Memory/Memory.h \
+ c:\workspace\deskctrl\firmware\deskctrl\build\sketch\src\Syslog/Syslog.h

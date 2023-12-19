@@ -48,11 +48,10 @@ DeskCtrl::DeskCtrl() :
             else
                 this->OnDownButtonReleased();
         }
-    ), 
+    ),
 
-    m_ledBoard("Board", PIN_LED_BOARD, false), 
+    m_ledBoard("Board", PIN_LED_BOARD, false)
 
-    m_motor(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL)
 {
 
 };
@@ -65,10 +64,19 @@ void DeskCtrl::Init()
   SYSLOG("Desk Controller startup --------------------");
   // Memory.Init();
   Memory::Init();
+
+
+  uint32_t position;
+
+  Memory::Load(0, &position, sizeof(uint32_t));
+
+  m_motor.Init(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
+  m_motor.Calibrate(position);
+
   m_ledBoard.Init();
   m_buttonUp.Init();
   m_buttonDown.Init();
-  m_motor.Init();
+
 }
 
 /*****************************************************************************************************************/
@@ -76,22 +84,22 @@ void DeskCtrl::Init()
 /*****************************************************************************************************************/
 void DeskCtrl::Process()
 {
-    static uint32_t Counter = 0;
+    static uint32_t counter = 0;
 
-    Counter++;
+    counter++;
 
-    if((Counter % 1000) == 0)
+    if((counter % 1000) == 0)
     {
         m_ledBoard.Toggle();
     }
 
-    if((Counter % 100) == 0)
+    if((counter % 100) == 0)
     {
         m_buttonUp.Pool();
         m_buttonDown.Pool();
     }
 
-    if((Counter % 10) == 0)
+    if((counter % 10) == 0)
     {
         m_motor.Pool();
     }
@@ -127,10 +135,9 @@ void DeskCtrl::OnMotorStart()
 
 }
 
-void DeskCtrl::OnMotorStop()
+void DeskCtrl::OnMotorStop(uint32_t position)
 {
-
-
+    Memory::Save(0, &position, sizeof(uint32_t));
 }
 
 /*****************************************************************************************************************/
@@ -141,7 +148,7 @@ void DeskCtrl::CmdDeskGoUp()
     m_motor.Start(Motor::EDir::Up);
 }
 
-void DeskCtrl::CmdDeskGoUpToNext()
+void DeskCtrl::CmdDeskGoUpToNextLevel()
 {
 
 }
@@ -151,7 +158,7 @@ void DeskCtrl::CmdDeskGoDown()
     m_motor.Start(Motor::EDir::Down);
 }
 
-void DeskCtrl::CmdDeskGoDownToNext()
+void DeskCtrl::CmdDeskGoDownToNextLevel()
 {
 
 }
@@ -164,4 +171,10 @@ void DeskCtrl::CmdDeskGoTo(uint32_t height)
 void DeskCtrl::CmdDeskStop()
 {
     m_motor.Stop();
+}
+
+void DeskCtrl::CmdDeskCalibrate(uint32_t height)
+{
+
+
 }

@@ -25,32 +25,24 @@ public:
     void OnDownButtonPressed();
     void OnDownButtonReleased();
     void OnMotorStart();
-    void OnMotorStop();
+    void OnMotorStop(uint32_t position);
 
     //Commands
     void CmdDeskGoUp();
-    void CmdDeskGoUpToNext();
+    void CmdDeskGoUpToNextLevel();
     void CmdDeskGoDown();
-    void CmdDeskGoDownToNext();
+    void CmdDeskGoDownToNextLevel();
     void CmdDeskGoTo(uint32_t height);
     void CmdDeskStop();
+    void CmdDeskCalibrate(uint32_t height);
 
 
-
-
+private:
     static DeskCtrl* s_instance;
     Led m_ledBoard;
     Button m_buttonUp;
     Button m_buttonDown;
     Motor m_motor;
-
-
-
-
-
-
-private:
-
 };
 
 #endif //_DESKCTRL_H_

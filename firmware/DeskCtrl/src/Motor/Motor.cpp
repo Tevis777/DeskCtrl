@@ -3,6 +3,8 @@
 #include "../Syslog/Syslog.h"
 #include "../Memory/Memory.h"
 
+#include "../DeskCtrl.h"
+
 Motor* Motor::s_instance = nullptr;
 
 void Motor::OnTimerISR()
@@ -10,33 +12,21 @@ void Motor::OnTimerISR()
   s_instance->HandleTick();
 }
 
-Motor::Motor(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull) : m_pinEn(pinEn), m_pinDir(pinDir), m_pinPull(pinPull)
+
+
+void Motor::Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
 {
   s_instance = this;
-}
 
-void Motor::Init()
-{
+  m_pinEn = pinEn;
+  m_pinDir = pinDir;
+  m_pinPull = pinPull;
+
   StepperSetup();
   timer1_attachInterrupt(OnTimerISR);
   timer1_disable();
 
-  uint32_t val;
-
-  Memory::Load(0, &val, sizeof(uint32_t));
-
-  SYSLOG("Motor init (position: %u/%u)", PosToHeight(val), val);
-
-  m_pos = val;
-
-  //ResetPos();
-
-
-  // timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
-  // timer1_write(FreqToTimerVal(INIT_FREQ));
-
-  // timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
-  // timer1_write(FreqToTimerVal(WORK_FREQ));
+  SYSLOG("Motor init (position: %u/%u)", PosToHeight(m_pos), m_pos);
 }
 
 void Motor::GoTo(uint32_t height)
@@ -53,6 +43,11 @@ void Motor::GoTo(uint32_t height)
 
 }
 
+void Motor::Calibrate(uint32_t position)
+{
+  m_pos = position;
+}
+
 
 void Motor::Start(EDir dir)
 {
@@ -66,6 +61,8 @@ void Motor::Start(EDir dir)
   SYSLOG("Motor start (%s - %u->%u)", GetDirStr(), m_pos, m_selectedPos);
   StepperSetDir(m_dir);
   SetSpeed(INIT_FREQ);
+
+  DeskCtrl::GetInstance()->OnMotorStart();
 }
 
 void Motor::Stop()
@@ -151,8 +148,9 @@ void Motor::Pool() //Every 10ms
       m_state = EState::Idle;
 
       uint32_t val = m_pos;
-      Memory::Save(0, &val, sizeof(uint32_t));
+      
       SYSLOG("Position: %u/%u", PosToHeight(m_pos), m_pos);
+      DeskCtrl::GetInstance()->OnMotorStop(m_pos);
     }
   }
 }
@@ -165,13 +163,6 @@ uint32_t Motor::PosToHeight(uint32_t pos)
 uint32_t Motor::HeightToPos(uint32_t height)
 {
   return (height - HEIGHT_MIN) * STEPS_PER_CM;
-}
-
-void Motor::ResetPos()
-{
-    uint32_t val = 0;
-    m_pos = val;
-    Memory::Save(0, &val, sizeof(uint32_t));
 }
 
 const char* Motor::GetDirStr()
