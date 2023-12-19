@@ -1,8 +1,8 @@
-#include "Led.h"
-#include "Syslog.h"
-#include "Button.h"
-#include "Motor.h"
-#include "Memory.h"
+#include "src/Led/Led.h"
+#include "src/Syslog/Syslog.h"
+#include "src/Buttons/Button.h"
+#include "src/Motor/Motor.h"
+#include "src/Memory/Memory.h"
 
 //GPIO profile
 #define PIN_BUTTON_UP (D1)
@@ -49,11 +49,11 @@ void loop() {
 
   if((Counter % 1000) == 0)
   {
-    
+    LedBoard.Toggle();
   }
 
   if((Counter % 100) == 0)
-  {LedBoard.Toggle();
+  {
     ButtonUp.Pool();
     ButtonDown.Pool();
   }

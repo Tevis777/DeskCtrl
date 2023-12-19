@@ -1,6 +1,6 @@
 #include "Button.h"
 #include "Arduino.h"
-#include "Syslog.h"
+#include "../Syslog/Syslog.h"
 
 Button::Button(const char* name, uint8_t pin, Handler handler) : m_name(name), m_pin(pin), m_handler(handler) {}
 

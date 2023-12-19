@@ -1,7 +1,8 @@
+#line 1 "C:\\Workspace\\DeskCtrl\\firmware\\DeskCtrl\\src\\Motor\\Motor.cpp"
 #include "Motor.h"
 #include "Arduino.h"
-#include "Syslog.h"
-#include "Memory.h"
+#include "../Syslog/Syslog.h"
+#include "../Memory/Memory.h"
 
 Motor* Motor::s_instance = nullptr;
 

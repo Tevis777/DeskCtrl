@@ -1,6 +1,7 @@
+#line 1 "C:\\Workspace\\DeskCtrl\\firmware\\DeskCtrl\\src\\Led\\Led.cpp"
 #include "Led.h"
 #include "Arduino.h"
-#include "Syslog.h"
+#include "../Syslog/Syslog.h"
 
 Led::Led(const char* name, uint8_t pin, bool log) : m_name(name), m_pin(pin), m_log(log) {}
 
