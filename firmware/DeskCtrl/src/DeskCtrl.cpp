@@ -1,72 +1,21 @@
 #include "DeskCtrl.h"
 #include "Arduino.h"
 
-//Hardware profile
+/*****************************************************************************************************************/
+/*                                              HARDWARE PROFILE                                                 */
+/*****************************************************************************************************************/
 #define PIN_BUTTON_UP   (D1)
 #define PIN_BUTTON_DOWN (D2)
 #define PIN_LED_BOARD   (D4)
-
 #define PIN_MOTOR_EN    (D5)
 #define PIN_MOTOR_DIR   (D6)
 #define PIN_MOTOR_PULL  (D7)
 
 
+/*****************************************************************************************************************/
+/*                                                  SINGLETON                                                    */
+/*****************************************************************************************************************/
 DeskCtrl* DeskCtrl::s_instance = nullptr;
-
-
-
-void OnButtonUp(Button::Event event)
-{
-  switch(event)
-  {
-    case Button::Event::Pressed:
-    {
-      DeskCtrl::GetInstance()->m_motor.Start(Motor::EDir::Up);
-      //Motor.GoTo(90);
-      return;
-    }
-    case Button::Event::Released:
-    default:
-    {
-      DeskCtrl::GetInstance()->m_motor.Stop();
-      return;
-    }
-  }
-}
-
-void OnButtonDown(Button::Event event)
-{
-  switch(event)
-  {
-    case Button::Event::Pressed:
-    {
-      DeskCtrl::GetInstance()->m_motor.Start(Motor::EDir::Down);
-      //Motor.GoTo(85);
-      return;
-    }
-    case Button::Event::Released:
-    default:
-    {
-      DeskCtrl::GetInstance()->m_motor.Stop();
-      return;
-    }
-  }
-}
-
-DeskCtrl::DeskCtrl() : 
-    m_buttonUp("Up", PIN_BUTTON_UP, OnButtonUp), 
-    m_ledBoard("Board", PIN_LED_BOARD, false), 
-    m_buttonDown("Down", PIN_BUTTON_DOWN, OnButtonDown), 
-    m_motor(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL)
-{
-
-};
-
-
-
-
-
-
 
 DeskCtrl* DeskCtrl::GetInstance()
 {
@@ -75,6 +24,37 @@ DeskCtrl* DeskCtrl::GetInstance()
 
     return s_instance;
 }
+
+/*****************************************************************************************************************/
+/*                                                     INIT                                                      */
+/*****************************************************************************************************************/
+DeskCtrl::DeskCtrl() : 
+
+    m_buttonUp("Up", PIN_BUTTON_UP,
+        [this](Button::Event evt)
+        {
+            if(evt == Button::Event::Pressed)
+                this->OnUpButtonPressed();
+            else
+                this->OnUpButtonReleased();
+        }
+    ), 
+
+    m_buttonDown("Down", PIN_BUTTON_DOWN, [this](Button::Event evt)
+        {
+            if(evt == Button::Event::Pressed)
+                this->OnDownButtonPressed();
+            else
+                this->OnDownButtonReleased();
+        }
+    ), 
+
+    m_ledBoard("Board", PIN_LED_BOARD, false), 
+
+    m_motor(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL)
+{
+
+};
 
 void DeskCtrl::Init()
 {
@@ -90,7 +70,9 @@ void DeskCtrl::Init()
   m_motor.Init();
 }
 
-
+/*****************************************************************************************************************/
+/*                                                     LOOP                                                      */
+/*****************************************************************************************************************/
 void DeskCtrl::Process()
 {
     static uint32_t Counter = 0;
@@ -112,4 +94,73 @@ void DeskCtrl::Process()
     {
         m_motor.Pool();
     }
+}
+
+
+
+/*****************************************************************************************************************/
+/*                                                    EVENTS                                                     */
+/*****************************************************************************************************************/
+void DeskCtrl::OnUpButtonPressed()
+{
+    CmdDeskGoUp();
+}
+
+void DeskCtrl::OnUpButtonReleased()
+{
+    CmdDeskStop();
+}
+
+void DeskCtrl::OnDownButtonPressed()
+{
+    CmdDeskGoDown();
+}
+
+void DeskCtrl::OnDownButtonReleased()
+{
+    CmdDeskStop();
+}
+
+void DeskCtrl::OnMotorStart()
+{
+
+}
+
+void DeskCtrl::OnMotorStop()
+{
+
+
+}
+
+/*****************************************************************************************************************/
+/*                                                   COMMANDS                                                    */
+/*****************************************************************************************************************/
+void DeskCtrl::CmdDeskGoUp()
+{
+    m_motor.Start(Motor::EDir::Up);
+}
+
+void DeskCtrl::CmdDeskGoUpToNext()
+{
+
+}
+
+void DeskCtrl::CmdDeskGoDown()
+{
+    m_motor.Start(Motor::EDir::Down);
+}
+
+void DeskCtrl::CmdDeskGoDownToNext()
+{
+
+}
+
+void DeskCtrl::CmdDeskGoTo(uint32_t height)
+{
+
+}
+
+void DeskCtrl::CmdDeskStop()
+{
+    m_motor.Stop();
 }

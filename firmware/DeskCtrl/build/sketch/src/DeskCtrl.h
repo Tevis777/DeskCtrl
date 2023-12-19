@@ -8,8 +8,6 @@
 #include "Memory/Memory.h"
 #include "Syslog/Syslog.h"
 
-#include <memory.h>
-
 class DeskCtrl
 {
 public:
@@ -17,9 +15,27 @@ public:
     
     static DeskCtrl* GetInstance();
 
-    
+    //Main control
     void Init();
     void Process();
+
+    //Events
+    void OnUpButtonPressed();
+    void OnUpButtonReleased();
+    void OnDownButtonPressed();
+    void OnDownButtonReleased();
+    void OnMotorStart();
+    void OnMotorStop();
+
+    //Commands
+    void CmdDeskGoUp();
+    void CmdDeskGoUpToNext();
+    void CmdDeskGoDown();
+    void CmdDeskGoDownToNext();
+    void CmdDeskGoTo(uint32_t height);
+    void CmdDeskStop();
+
+
 
 
     static DeskCtrl* s_instance;
@@ -29,9 +45,11 @@ public:
     Motor m_motor;
 
 
+
+
+
+
 private:
-
-
 
 };
 
