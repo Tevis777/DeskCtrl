@@ -35,13 +35,12 @@ void DeskCtrl::Init()
 
   SYSLOG("Desk Controller startup --------------------");
   // Memory.Init();
-  Memory::Init();
+  m_storage.Init();
 
 
   uint32_t position;
 
-  Memory::Load(0, &position, sizeof(uint32_t));
-
+  m_storage.LoadPosition(position);
   m_motor.Init(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
   m_motor.Calibrate(position);
   m_ledBoard.Init("Board", PIN_LED_BOARD, false);
@@ -120,7 +119,7 @@ void DeskCtrl::OnMotorStart()
 
 void DeskCtrl::OnMotorStop(uint32_t position)
 {
-    Memory::Save(0, &position, sizeof(uint32_t));
+    m_storage.SavePosition(position);
 }
 
 /*****************************************************************************************************************/

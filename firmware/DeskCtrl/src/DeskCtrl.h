@@ -4,8 +4,8 @@
 #include "Buttons/Button.h"
 #include "Motor/Motor.h"
 #include "Led/Led.h"
-#include "Memory/Memory.h"
 #include "Syslog/Syslog.h"
+#include "Storage/Storage.h"
 
 class DeskCtrl
 {
@@ -40,6 +40,7 @@ private:
     Button m_buttonUp;
     Button m_buttonDown;
     Motor m_motor;
+    Storage m_storage;
 };
 
 #endif //_DESKCTRL_H_

@@ -1,7 +1,6 @@
 #include "Motor.h"
 #include "Arduino.h"
 #include "../Syslog/Syslog.h"
-#include "../Memory/Memory.h"
 
 #include "../DeskCtrl.h"
 
