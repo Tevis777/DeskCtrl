@@ -2,11 +2,12 @@
 #include "Arduino.h"
 #include "../Syslog/Syslog.h"
 
-void Button::Init(const char* name, uint8_t pin, Handler handler)
+void Button::Init(const char* name, uint8_t pin, EActive active, Handler handler)
 {
   m_name = name;
   m_pin = pin;
   m_handler = handler;
+  m_active = active;
 
   SYSLOG("Button init (%s)", m_name);
   pinMode(m_pin, INPUT);
@@ -34,5 +35,12 @@ void Button::Pool()
 
 bool Button::IsPressed()
 {
-  return digitalRead(m_pin);
+    if(m_active == EActive::High)
+    {
+        return digitalRead(m_pin);
+    }
+    else
+    {
+        return !digitalRead(m_pin);
+    }
 }

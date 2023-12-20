@@ -9,7 +9,7 @@
 
 #define PIN_MOTOR_EN    (D0)
 
-#define PIN_BUTTON_UP   (D1)
+#define PIN_BUTTON_UP   (D3)
 
 //D1 = EEPROM
 //D2 = EEPROM
@@ -20,10 +20,10 @@
 
 
 //D5 - takeable
-#define PIN_MOTOR_DIR   (D6)
+#define PIN_MOTOR_DIR   (D8)
 #define PIN_MOTOR_PULL  (D7)
 
-#define PIN_BUTTON_DOWN (D8)
+#define PIN_BUTTON_DOWN (D6)
 
 /*****************************************************************************************************************/
 /*                                                  SINGLETON                                                    */
@@ -60,7 +60,7 @@ void DeskCtrl::Init()
 
 
   m_ledBoard.Init("Board", PIN_LED_BOARD, false);
-  m_buttonUp.Init("Up", PIN_BUTTON_UP, [this](Button::Event evt)
+  m_buttonUp.Init("Up", PIN_BUTTON_UP, Button::EActive::Low, [this](Button::Event evt)
                                         {
                                             if(evt == Button::Event::Pressed)
                                                 this->OnUpButtonPressed();
@@ -68,7 +68,7 @@ void DeskCtrl::Init()
                                                 this->OnUpButtonReleased();
                                         });
 
-  m_buttonDown.Init("Down", PIN_BUTTON_DOWN, [this](Button::Event evt)
+  m_buttonDown.Init("Down", PIN_BUTTON_DOWN, Button::EActive::Low, [this](Button::Event evt)
                                         {
                                             if(evt == Button::Event::Pressed)
                                                 this->OnDownButtonPressed();

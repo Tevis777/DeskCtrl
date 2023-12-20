@@ -14,9 +14,15 @@ public:
     Released
   };
 
+  enum class EActive
+  {
+    Low,
+    High
+  };
+
   using Handler = std::function<void(Event)>;
 
-  void Init(const char* name, uint8_t pin, Handler handler);
+  void Init(const char* name, uint8_t pin, EActive active, Handler handler);
   void Pool();
   bool IsPressed();
 
@@ -25,6 +31,7 @@ private:
   uint8_t m_pin;
   Handler m_handler;
   bool m_prev = false;
+  EActive m_active;
 };
 
 #endif // _BUTTON_H_
