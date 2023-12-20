@@ -41,7 +41,7 @@ void Motor::StartDst(uint32_t height)
     req.position = HeightToPos(height);
     m_request = std::make_shared<Request>(req);
 
-    SYSLOG("Motor start request (dst=%u)", height);
+    SYSLOG("Motor start request (dst=%u->%u)", PosToHeight(m_position), height);
 }
 
 void Motor::StartManual(EDir dir)
@@ -52,12 +52,17 @@ void Motor::StartManual(EDir dir)
     req.position = UINT32_MAX;
     m_request = std::make_shared<Request>(req);
 
-    SYSLOG("Motor start request (dir=%s)", GetDirStr());
+    SYSLOG("Motor start request (dir=%s)", GetDirStr(dir));
 }
 
 bool Motor::IsActive()
 {
     return (m_state != EState::Idle);
+}
+
+uint32_t Motor::GetHeight()
+{
+    return PosToHeight(m_position);
 }
 
 void Motor::Stop()
@@ -171,11 +176,22 @@ void Motor::Pool(uint32_t interval)
         }
     }
 
+    if(m_dir == EDir::Down) //Handle absolute limits
+    {
+
+    }
+    else
+    {
+
+    }
+
     if(m_state == EState::Starting) //Handle soft start
     {
-        m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
-
-        SetSpeed(m_freq);
+        if(m_freq < WORK_FREQ)
+        {
+            m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
+            SetSpeed(m_freq);
+        }
 
         if(m_freq >= WORK_FREQ)
         {
@@ -185,14 +201,18 @@ void Motor::Pool(uint32_t interval)
 
     if(m_state == EState::Stopping) //Handle soft stop
     {
-        m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
-
-        SetSpeed(m_freq);
+        if(m_freq > INIT_FREQ)
+        {
+            m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
+            SetSpeed(m_freq);
+        }
 
         if(m_freq <= INIT_FREQ)
         {
             SetSpeed(0);
             m_state = EState::Idle;
+            m_selectedPos = UINT32_MAX;
+            SYSLOG("Motor stopped (height:%u)", PosToHeight(m_position));
             DeskCtrl::GetInstance()->OnMotorStop(m_position);
         }
     }
@@ -208,9 +228,9 @@ uint32_t Motor::HeightToPos(uint32_t height)
     return (height - HEIGHT_MIN) * STEPS_PER_CM;
 }
 
-const char* Motor::GetDirStr()
+const char* Motor::GetDirStr(EDir dir)
 {
-    return (m_dir == EDir::Down) ? "Down" : "Up";
+    return (dir == EDir::Down) ? "Down" : "Up";
 }
 
 

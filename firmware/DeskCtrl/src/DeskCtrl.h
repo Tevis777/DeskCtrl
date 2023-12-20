@@ -7,6 +7,8 @@
 #include "Syslog/Syslog.h"
 #include "Storage/Storage.h"
 
+#include <vector>
+
 class DeskCtrl
 {
 public:
@@ -26,9 +28,9 @@ public:
 
     //Commands
     void CmdDeskGoUp();
-    void CmdDeskGoUpToNextLevel();
+    void CmdDeskGoUpToNextPreset();
     void CmdDeskGoDown();
-    void CmdDeskGoDownToNextLevel();
+    void CmdDeskGoDownToNextPreset();
     void CmdDeskGoTo(uint32_t height);
     void CmdDeskStop();
     void CmdDeskCalibrate(uint32_t height);
@@ -41,6 +43,8 @@ private:
     Button m_buttonDown;
     Motor m_motor;
     Storage m_storage;
+
+    std::vector<uint32_t> m_presets;
 };
 
 #endif //_DESKCTRL_H_

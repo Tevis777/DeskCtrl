@@ -1,5 +1,6 @@
 #include "DeskCtrl.h"
 #include "Arduino.h"
+#include <algorithm>
 
 /*****************************************************************************************************************/
 /*                                              HARDWARE PROFILE                                                 */
@@ -37,7 +38,6 @@ void DeskCtrl::Init()
   // Memory.Init();
   m_storage.Init();
 
-
   uint32_t position;
 
   m_storage.LoadPosition(position);
@@ -59,6 +59,10 @@ void DeskCtrl::Init()
                                             else
                                                 this->OnDownButtonReleased();
                                         });
+
+    m_presets.push_back(80);
+    m_presets.push_back(90);
+    m_presets.push_back(100);
 }
 
 /*****************************************************************************************************************/
@@ -94,7 +98,11 @@ void DeskCtrl::Process()
 /*****************************************************************************************************************/
 void DeskCtrl::OnUpButtonPressed()
 {
-    if(m_motor.IsActive())
+    if(m_buttonDown.IsPressed())
+    {
+        CmdDeskGoDownToNextPreset();
+    }
+    else if(m_motor.IsActive())
     {
         CmdDeskStop();
     }
@@ -111,7 +119,11 @@ void DeskCtrl::OnUpButtonReleased()
 
 void DeskCtrl::OnDownButtonPressed()
 {
-    if(m_motor.IsActive())
+    if(m_buttonUp.IsPressed())
+    {
+        CmdDeskGoUpToNextPreset();
+    }
+    else if(m_motor.IsActive())
     {
         CmdDeskStop();
     }
@@ -119,8 +131,6 @@ void DeskCtrl::OnDownButtonPressed()
     {
         CmdDeskGoDown();
     }
-
-    
 }
 
 void DeskCtrl::OnDownButtonReleased()
@@ -146,9 +156,18 @@ void DeskCtrl::CmdDeskGoUp()
     m_motor.StartManual(Motor::EDir::Up);
 }
 
-void DeskCtrl::CmdDeskGoUpToNextLevel()
+void DeskCtrl::CmdDeskGoUpToNextPreset()
 {
+    uint32_t height = m_motor.GetHeight();
 
+    for(const auto& preset : m_presets)
+    {
+        if(preset <= height)
+            continue;
+
+        m_motor.StartDst(preset);
+        break;
+    }
 }
 
 void DeskCtrl::CmdDeskGoDown()
@@ -156,9 +175,21 @@ void DeskCtrl::CmdDeskGoDown()
     m_motor.StartManual(Motor::EDir::Down);
 }
 
-void DeskCtrl::CmdDeskGoDownToNextLevel()
+void DeskCtrl::CmdDeskGoDownToNextPreset()
 {
+    uint32_t height = m_motor.GetHeight();
+    auto presets = m_presets;
 
+    std::reverse(presets.begin(), presets.end());
+
+    for(const auto& preset : presets)
+    {
+        if(preset >= height)
+            continue;
+
+        m_motor.StartDst(preset);
+        break;
+    }
 }
 
 void DeskCtrl::CmdDeskGoTo(uint32_t height)

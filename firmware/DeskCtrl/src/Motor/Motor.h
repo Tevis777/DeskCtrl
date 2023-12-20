@@ -22,6 +22,7 @@ public:
     void StartManual(EDir dir);
 
     bool IsActive();
+    uint32_t GetHeight();
 
     void Calibrate(uint32_t position);
   
@@ -72,7 +73,7 @@ private:
     uint32_t PosToHeight(uint32_t pos);
     uint32_t HeightToPos(uint32_t height);
 
-    const char* GetDirStr();
+    const char* GetDirStr(EDir dir);
 
 
 
