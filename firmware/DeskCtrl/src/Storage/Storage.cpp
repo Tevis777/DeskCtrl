@@ -2,9 +2,12 @@
 #include "Memory.h"
 
 
-void Storage::Init()
+void Storage::Init(uint8_t sda, uint8_t scl)
 {
     Memory::Init();
+    m_eeprom.Init(sda, scl);
+
+
 }
 
 void Storage::SavePosition(uint32_t position)

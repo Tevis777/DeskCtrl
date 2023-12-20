@@ -1,4 +1,5 @@
 #include "src/DeskCtrl.h"
+#include <Wire.h>
 
 void setup()
 {

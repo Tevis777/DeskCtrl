@@ -5,25 +5,16 @@
 /*****************************************************************************************************************/
 /*                                              HARDWARE PROFILE                                                 */
 /*****************************************************************************************************************/
-//D0 - takeable
+#define PIN_MOTOR_EN        (D0)
+#define PIN_EEPROM_SCL      (D1)
+#define PIN_EEPROM_SDA      (D2)
+#define PIN_BUTTON_UP       (D3)
+#define PIN_LED_BOARD       (D4)
+#define PIN_MOTOR_POWER     (D5)
+#define PIN_BUTTON_DOWN     (D6)
+#define PIN_MOTOR_PULL      (D7)
+#define PIN_MOTOR_DIR       (D8)
 
-#define PIN_MOTOR_EN    (D0)
-
-#define PIN_BUTTON_UP   (D3)
-
-//D1 = EEPROM
-//D2 = EEPROM
-
-
-#define PIN_MOTOR_POWER   (D5)
-#define PIN_LED_BOARD   (D4)
-
-
-//D5 - takeable
-#define PIN_MOTOR_DIR   (D8)
-#define PIN_MOTOR_PULL  (D7)
-
-#define PIN_BUTTON_DOWN (D6)
 
 /*****************************************************************************************************************/
 /*                                                  SINGLETON                                                    */
@@ -48,13 +39,14 @@ void DeskCtrl::Init()
 
   SYSLOG("Desk Controller startup --------------------");
   // Memory.Init();
-  m_storage.Init();
+  m_storage.Init(PIN_EEPROM_SDA, PIN_EEPROM_SCL);
 
   uint32_t position;
 
   m_storage.LoadPosition(position);
   
   m_motorPower.Init(PIN_MOTOR_POWER);
+  m_motorPower.On();
   m_motor.Init(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
   m_motor.Calibrate(position);
 
@@ -116,23 +108,47 @@ void DeskCtrl::Process()
 /*****************************************************************************************************************/
 void DeskCtrl::OnUpButtonPressed()
 {
-    if(m_buttonDown.IsPressed())
-    {
-        CmdDeskGoDownToNextPreset();
-    }
-    else if(m_motor.IsActive())
-    {
-        CmdDeskStop();
-    }
-    else
-    {
-        CmdDeskGoUp();
-    }
+    // if(m_buttonDown.IsPressed())
+    // {
+    //     CmdDeskGoDownToNextPreset();
+    // }
+    // else if(m_motor.IsActive())
+    // {
+    //     CmdDeskStop();
+    // }
+    // else
+    // {
+    //     CmdDeskGoUp();
+    // }
 }
 
 void DeskCtrl::OnUpButtonReleased()
 {
+    SYSLOG("EEPROM TEST");
+    int i;
 
+    auto SIZE = Eeprom::SIZE / 2;
+
+    uint16_t buff[SIZE];
+
+    for(i = 0; i < SIZE; i++)
+    {
+        buff[i] = i;
+    }
+
+    for(i = 0; i < SIZE; i++)
+    {
+        m_storage.m_eeprom.Write2B(i * 2, buff[i]);
+    }
+
+    memset(buff, 0xAA, sizeof(buff));
+
+    m_storage.m_eeprom.ReadAll((uint8_t*)buff);
+    
+    for(i = 0; i < SIZE; i++)
+    {
+        SYSLOG("Ee%u: %d", i, buff[i]);
+    }
 }
 
 void DeskCtrl::OnDownButtonPressed()
@@ -164,7 +180,6 @@ void DeskCtrl::OnMotorStart()
 void DeskCtrl::OnMotorStop(uint32_t position)
 {
     m_storage.SavePosition(position);
-    m_motorPower.Off();
 }
 
 /*****************************************************************************************************************/
@@ -172,7 +187,6 @@ void DeskCtrl::OnMotorStop(uint32_t position)
 /*****************************************************************************************************************/
 void DeskCtrl::CmdDeskGoUp()
 {
-    m_motorPower.On();
     m_motor.StartManual(Motor::EDir::Up);
 }
 
@@ -185,7 +199,6 @@ void DeskCtrl::CmdDeskGoUpToNextPreset()
         if(preset <= height)
             continue;
 
-        m_motorPower.On();
         m_motor.StartDst(preset);
         break;
     }
@@ -193,7 +206,6 @@ void DeskCtrl::CmdDeskGoUpToNextPreset()
 
 void DeskCtrl::CmdDeskGoDown()
 {
-    m_motorPower.On();
     m_motor.StartManual(Motor::EDir::Down);
 }
 
@@ -209,7 +221,6 @@ void DeskCtrl::CmdDeskGoDownToNextPreset()
         if(preset >= height)
             continue;
 
-        m_motorPower.On();
         m_motor.StartDst(preset);
         break;
     }
