@@ -9,9 +9,11 @@ class Eeprom
 public:
     static constexpr uint32_t SIZE = 128;
 
-    void Init(uint8_t sda, uint8_t scl);
+    void Init();
     bool Write2B(uint32_t addr, uint16_t data);
+    bool Read2B(uint32_t addr, uint16_t* data);
     bool ReadAll(uint8_t* data);
+
 private:
     static constexpr uint32_t DEV_ADDR = 0x50;
 };

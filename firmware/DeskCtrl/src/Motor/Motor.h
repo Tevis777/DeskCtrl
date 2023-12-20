@@ -53,6 +53,7 @@ private:
     static constexpr uint32_t TOTAL_STEPS = 44800;
 
     static constexpr uint32_t STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN));
+    static constexpr uint32_t LIMIT_MARGIN = 2000;
 
     static constexpr uint32_t START_TIME = 500; //[ms]
 

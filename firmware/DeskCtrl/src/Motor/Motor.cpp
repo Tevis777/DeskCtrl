@@ -176,14 +176,26 @@ void Motor::Pool(uint32_t interval)
         }
     }
 
-    if(m_dir == EDir::Down) //Handle absolute limits
+    if(m_state != EState::Idle)
     {
-
+        if(m_dir == EDir::Down) //Handle absolute limits
+        {
+            if(m_position <= LIMIT_MARGIN)
+            {
+                m_state = EState::Stopping;
+                m_request = {};
+            }
+        }
+        else
+        {
+            if((m_position + LIMIT_MARGIN) >= TOTAL_STEPS)
+            {
+                m_state = EState::Stopping;
+                m_request = {};
+            }
+        }
     }
-    else
-    {
 
-    }
 
     if(m_state == EState::Starting) //Handle soft start
     {

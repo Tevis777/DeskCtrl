@@ -39,7 +39,7 @@ void DeskCtrl::Init()
 
   SYSLOG("Desk Controller startup --------------------");
   // Memory.Init();
-  m_storage.Init(PIN_EEPROM_SDA, PIN_EEPROM_SCL);
+  m_storage.Init();
 
   uint32_t position;
 
@@ -71,8 +71,8 @@ void DeskCtrl::Init()
     
 
     m_presets.push_back(80);
-    m_presets.push_back(90);
-    m_presets.push_back(100);
+    m_presets.push_back(95);
+    m_presets.push_back(115);
 }
 
 /*****************************************************************************************************************/
@@ -108,47 +108,23 @@ void DeskCtrl::Process()
 /*****************************************************************************************************************/
 void DeskCtrl::OnUpButtonPressed()
 {
-    // if(m_buttonDown.IsPressed())
-    // {
-    //     CmdDeskGoDownToNextPreset();
-    // }
-    // else if(m_motor.IsActive())
-    // {
-    //     CmdDeskStop();
-    // }
-    // else
-    // {
-    //     CmdDeskGoUp();
-    // }
+    if(m_buttonDown.IsPressed())
+    {
+        CmdDeskGoDownToNextPreset();
+    }
+    else if(m_motor.IsActive())
+    {
+        CmdDeskStop();
+    }
+    else
+    {
+        CmdDeskGoUp();
+    }
 }
 
 void DeskCtrl::OnUpButtonReleased()
 {
-    SYSLOG("EEPROM TEST");
-    int i;
 
-    auto SIZE = Eeprom::SIZE / 2;
-
-    uint16_t buff[SIZE];
-
-    for(i = 0; i < SIZE; i++)
-    {
-        buff[i] = i;
-    }
-
-    for(i = 0; i < SIZE; i++)
-    {
-        m_storage.m_eeprom.Write2B(i * 2, buff[i]);
-    }
-
-    memset(buff, 0xAA, sizeof(buff));
-
-    m_storage.m_eeprom.ReadAll((uint8_t*)buff);
-    
-    for(i = 0; i < SIZE; i++)
-    {
-        SYSLOG("Ee%u: %d", i, buff[i]);
-    }
 }
 
 void DeskCtrl::OnDownButtonPressed()

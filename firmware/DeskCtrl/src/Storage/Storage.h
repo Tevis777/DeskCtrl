@@ -7,12 +7,13 @@
 class Storage
 {
 public:
-    void Init(uint8_t sda, uint8_t scl);
+    void Init();
     void SavePosition(uint32_t position);
     void LoadPosition(uint32_t& position);
 
     Eeprom m_eeprom;
 private:
+    uint32_t m_storageAddr = 0;
     
 
 
