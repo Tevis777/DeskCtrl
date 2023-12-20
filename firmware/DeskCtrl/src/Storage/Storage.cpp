@@ -7,7 +7,7 @@ void Storage::Init()
     uint16_t buff[Eeprom::SIZE / 2];
     int32_t i;
 
-    Memory::Init();
+    m_flash.Init();
     m_eeprom.Init();
     m_eeprom.ReadAll((uint8_t*)buff);
 
@@ -37,7 +37,7 @@ void Storage::SavePosition(uint32_t position)
 void Storage::LoadPosition(uint32_t& position)
 {
     uint16_t val;
-    
+
     m_eeprom.Read2B(m_storageAddr, &val);
 
     if(val == 0xFFFFF)
