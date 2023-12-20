@@ -3,6 +3,7 @@
 
 #include "Buttons/Button.h"
 #include "Motor/Motor.h"
+#include "Motor/MotorPower.h"
 #include "Led/Led.h"
 #include "Syslog/Syslog.h"
 #include "Storage/Storage.h"
@@ -42,6 +43,7 @@ private:
     Button m_buttonUp;
     Button m_buttonDown;
     Motor m_motor;
+    MotorPower m_motorPower;
     Storage m_storage;
 
     std::vector<uint32_t> m_presets;

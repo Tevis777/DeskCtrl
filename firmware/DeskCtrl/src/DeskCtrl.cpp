@@ -5,13 +5,25 @@
 /*****************************************************************************************************************/
 /*                                              HARDWARE PROFILE                                                 */
 /*****************************************************************************************************************/
+//D0 - takeable
+
+#define PIN_MOTOR_EN    (D0)
+
 #define PIN_BUTTON_UP   (D1)
-#define PIN_BUTTON_DOWN (D2)
+
+//D1 = EEPROM
+//D2 = EEPROM
+
+
+#define PIN_MOTOR_POWER   (D5)
 #define PIN_LED_BOARD   (D4)
-#define PIN_MOTOR_EN    (D5)
+
+
+//D5 - takeable
 #define PIN_MOTOR_DIR   (D6)
 #define PIN_MOTOR_PULL  (D7)
 
+#define PIN_BUTTON_DOWN (D8)
 
 /*****************************************************************************************************************/
 /*                                                  SINGLETON                                                    */
@@ -32,7 +44,7 @@ DeskCtrl* DeskCtrl::GetInstance()
 void DeskCtrl::Init()
 {
   SyslogInit();
-  delay(5000);
+  //delay(500);
 
   SYSLOG("Desk Controller startup --------------------");
   // Memory.Init();
@@ -41,8 +53,12 @@ void DeskCtrl::Init()
   uint32_t position;
 
   m_storage.LoadPosition(position);
+  
+  m_motorPower.Init(PIN_MOTOR_POWER);
   m_motor.Init(PIN_MOTOR_EN, PIN_MOTOR_DIR, PIN_MOTOR_PULL);
   m_motor.Calibrate(position);
+
+
   m_ledBoard.Init("Board", PIN_LED_BOARD, false);
   m_buttonUp.Init("Up", PIN_BUTTON_UP, [this](Button::Event evt)
                                         {
@@ -59,6 +75,8 @@ void DeskCtrl::Init()
                                             else
                                                 this->OnDownButtonReleased();
                                         });
+
+    
 
     m_presets.push_back(80);
     m_presets.push_back(90);
@@ -146,6 +164,7 @@ void DeskCtrl::OnMotorStart()
 void DeskCtrl::OnMotorStop(uint32_t position)
 {
     m_storage.SavePosition(position);
+    m_motorPower.Off();
 }
 
 /*****************************************************************************************************************/
@@ -153,6 +172,7 @@ void DeskCtrl::OnMotorStop(uint32_t position)
 /*****************************************************************************************************************/
 void DeskCtrl::CmdDeskGoUp()
 {
+    m_motorPower.On();
     m_motor.StartManual(Motor::EDir::Up);
 }
 
@@ -165,6 +185,7 @@ void DeskCtrl::CmdDeskGoUpToNextPreset()
         if(preset <= height)
             continue;
 
+        m_motorPower.On();
         m_motor.StartDst(preset);
         break;
     }
@@ -172,6 +193,7 @@ void DeskCtrl::CmdDeskGoUpToNextPreset()
 
 void DeskCtrl::CmdDeskGoDown()
 {
+    m_motorPower.On();
     m_motor.StartManual(Motor::EDir::Down);
 }
 
@@ -187,6 +209,7 @@ void DeskCtrl::CmdDeskGoDownToNextPreset()
         if(preset >= height)
             continue;
 
+        m_motorPower.On();
         m_motor.StartDst(preset);
         break;
     }
