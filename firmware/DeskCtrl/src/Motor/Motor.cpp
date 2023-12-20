@@ -23,12 +23,14 @@ void Motor::Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
     timer1_attachInterrupt(OnTimerISR);
     timer1_disable();
 
-    SYSLOG("Motor init (position: %u/%u)", PosToHeight(m_position), m_position);
+    SYSLOG("Motor initialized");
 }
 
 void Motor::Calibrate(uint32_t position)
 {
     m_position = position;
+
+    SYSLOG("Motor calibrated (position: %u/%u)", PosToHeight(m_position), m_position);
 }
 
 void Motor::StartDst(uint32_t height)
@@ -38,6 +40,8 @@ void Motor::StartDst(uint32_t height)
     req.dir = EDir::Unknown;
     req.position = HeightToPos(height);
     m_request = std::make_shared<Request>(req);
+
+    SYSLOG("Motor start request (dst=%u)", height);
 }
 
 void Motor::StartManual(EDir dir)
@@ -47,6 +51,13 @@ void Motor::StartManual(EDir dir)
     req.dir = dir;
     req.position = UINT32_MAX;
     m_request = std::make_shared<Request>(req);
+
+    SYSLOG("Motor start request (dir=%s)", GetDirStr());
+}
+
+bool Motor::IsActive()
+{
+    return (m_state != EState::Idle);
 }
 
 void Motor::Stop()
@@ -56,6 +67,8 @@ void Motor::Stop()
     req.dir = EDir::Unknown;
     req.position = UINT32_MAX;
     m_request = std::make_shared<Request>(req);
+
+    SYSLOG("Motor stop request");
 }
 
 void Motor::HandleTick()
@@ -118,6 +131,7 @@ void Motor::Pool(uint32_t interval)
                 PhySetDir(m_dir);
                 SetSpeed(INIT_FREQ);
                 m_request = {};
+                SYSLOG("Motor starting");
             }
             else //Motor is running
             {
@@ -129,6 +143,7 @@ void Motor::Pool(uint32_t interval)
                 else //Direction mismatch, wait until stopped
                 {
                     m_state = EState::Stopping;
+                    SYSLOG("Motor stopping");
                 }
             }
         }
@@ -137,6 +152,7 @@ void Motor::Pool(uint32_t interval)
             if(m_state != EState::Idle)
             {
                 m_state = EState::Stopping;
+                SYSLOG("Motor stopping");
             }
 
             m_request = {};

@@ -21,6 +21,8 @@ public:
     void StartDst(uint32_t height);
     void StartManual(EDir dir);
 
+    bool IsActive();
+
     void Calibrate(uint32_t position);
   
 

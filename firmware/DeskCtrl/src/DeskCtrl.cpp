@@ -94,22 +94,38 @@ void DeskCtrl::Process()
 /*****************************************************************************************************************/
 void DeskCtrl::OnUpButtonPressed()
 {
-    CmdDeskGoUp();
+    if(m_motor.IsActive())
+    {
+        CmdDeskStop();
+    }
+    else
+    {
+        CmdDeskGoUp();
+    }
 }
 
 void DeskCtrl::OnUpButtonReleased()
 {
-    CmdDeskStop();
+
 }
 
 void DeskCtrl::OnDownButtonPressed()
 {
-    CmdDeskGoDown();
+    if(m_motor.IsActive())
+    {
+        CmdDeskStop();
+    }
+    else
+    {
+        CmdDeskGoDown();
+    }
+
+    
 }
 
 void DeskCtrl::OnDownButtonReleased()
 {
-    CmdDeskStop();
+
 }
 
 void DeskCtrl::OnMotorStart()
