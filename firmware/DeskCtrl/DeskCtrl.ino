@@ -1,5 +1,6 @@
 #include "src/DeskCtrl.h"
 #include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
 #include <Wire.h>
 
 void setup()
