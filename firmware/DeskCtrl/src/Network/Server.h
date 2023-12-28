@@ -3,6 +3,7 @@
 
 #include <ESP8266WiFi.h>
 #include <stdint.h>
+#include "Api.h"
 
 class HttpServer
 {
@@ -17,6 +18,8 @@ private:
         ReqLine,
         ReqHeaders,
         ReqBody,
+        Handler,
+        RespLine,
         RespHeaders,
         RespBody,
     };
@@ -24,6 +27,7 @@ private:
 
 
     WiFiServer m_server{80};
+    Api m_api;
 };
 
 #endif //_SERVER_H_
