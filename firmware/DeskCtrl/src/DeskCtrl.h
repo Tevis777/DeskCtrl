@@ -7,6 +7,7 @@
 #include "Led/Led.h"
 #include "Syslog/Syslog.h"
 #include "Storage/Storage.h"
+#include "Network/Network.h"
 
 #include <vector>
 
@@ -45,6 +46,7 @@ private:
     Motor m_motor;
     MotorPower m_motorPower;
     Storage m_storage;
+    Network m_network;
 
     std::vector<uint32_t> m_presets;
 };

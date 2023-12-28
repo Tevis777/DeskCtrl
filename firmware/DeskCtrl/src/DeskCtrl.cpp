@@ -69,6 +69,7 @@ void DeskCtrl::Init()
                                         });
 
     
+    m_network.Connect("UPC2012", "LubiePlacki666");
 
     m_presets.push_back(80);
     m_presets.push_back(95);
@@ -93,6 +94,7 @@ void DeskCtrl::Process()
     {
         m_buttonUp.Pool();
         m_buttonDown.Pool();
+        m_network.Pool();
     }
 
     if((counter % 10) == 0)
