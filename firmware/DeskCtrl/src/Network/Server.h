@@ -22,6 +22,7 @@ private:
         RespLine,
         RespHeaders,
         RespBody,
+        Disconnect,
     };
 
 

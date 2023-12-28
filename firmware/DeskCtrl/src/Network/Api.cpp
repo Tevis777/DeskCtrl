@@ -5,7 +5,7 @@ static ApiResult Api_Calibration(const std::string& body)
 {
     SYSLOG("API CALIBRATION CALLED!!!!");
 
-    return {200, "yay"};
+    return {200, "My response body hehe"};
 }
 
 Api::Api()

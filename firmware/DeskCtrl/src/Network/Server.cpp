@@ -1,7 +1,16 @@
 #include "Server.h"
 #include "Api.h"
 #include <string>
+#include <map>
 #include "../Syslog/Syslog.h"
+
+static const std::map<uint32_t, const char*> RESP_TEXTS = 
+{
+    {200, "OK"},
+    {400, "Bad Request"},
+    {404, "Not found"},
+    {500, "Internal Server Error"},
+};
 
 
 void HttpServer::Init()
@@ -110,7 +119,7 @@ void HttpServer::Pool()
 
                 ParseReqLine(tmp, reqMethod, reqPath);
 
-                SYSLOG("%s %s", reqMethod.c_str(), reqPath.c_str());
+                SYSLOG("Http req: %s %s", reqMethod.c_str(), reqPath.c_str());
 
                 state = EState::ReqHeaders;
                 tmp = "";
@@ -138,7 +147,7 @@ void HttpServer::Pool()
                     break;
                 }
 
-                //SYSLOG("%s: %s", name.c_str(), value.c_str());
+                //SYSLOG("Http: %s: %s", name.c_str(), value.c_str());
 
                 if(name == "Content-Length")
                 {
@@ -158,33 +167,48 @@ void HttpServer::Pool()
                 if(reqBody.length() < contentLen)
                     continue;
 
-                SYSLOG("%s", reqBody.c_str());
+                SYSLOG("Http req: %s", reqBody.c_str());
                 state = EState::Handler;
                 continue;
             }
             case EState::Handler:
             {   
-                m_api.ProcessRequest(reqMethod, reqPath, reqBody);
-                return;
+                result = m_api.ProcessRequest(reqMethod, reqPath, reqBody);
+                SYSLOG("Http resp: %u %s", result.code, result.body.c_str());
+                state = EState::RespLine;
+                continue;
             }
             case EState::RespLine:
             {
-
-
+                char buff[256];
+                snprintf(buff, sizeof(buff), "HTTP/1.1 %u %s", result.code, RESP_TEXTS.at(result.code));
+                client.println(buff);
+                state = EState::RespHeaders;
+                continue;
             }
             case EState::RespHeaders:
             {
-
-
+                char buff[256];
+                snprintf(buff, sizeof(buff), "Content-Length: %u", result.body.length());
+                client.println(buff);
+                client.println("Content-Type: application/json");
+                client.println("Connection: close");
+                client.println();
+                state = EState::RespBody;
+                continue;
             }
             case EState::RespBody:
             {
-
-
+                client.print(result.body.c_str());
+                state = EState::Disconnect;
+                continue;
             }
-
-
-
+            case EState::Disconnect:
+            default:
+            {
+                client.stop();
+                return;
+            }
         }
     }
 }
