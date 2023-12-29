@@ -25,6 +25,9 @@ public:
     uint32_t GetHeight();
 
     void Calibrate(uint32_t position);
+
+    static uint32_t PosToHeight(uint32_t pos);
+    static uint32_t HeightToPos(uint32_t height);
   
 
 private:
@@ -70,9 +73,6 @@ private:
 
     volatile uint32_t m_position;
     uint32_t m_selectedPos = UINT32_MAX;
-
-    uint32_t PosToHeight(uint32_t pos);
-    uint32_t HeightToPos(uint32_t height);
 
     const char* GetDirStr(EDir dir);
 

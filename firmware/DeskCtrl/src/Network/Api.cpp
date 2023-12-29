@@ -1,6 +1,7 @@
 #include "Api.h"
 #include <ArduinoJson.h>
 #include "../Syslog/Syslog.h"
+#include "../DeskCtrl.h"
 
 using namespace ArduinoJson;
 
@@ -13,22 +14,14 @@ static ApiResult Api_Calibration(const std::string& body)
     if(res != DeserializationError::Code::Ok)
         return {400, ""};
 
-    auto val1 = req["val1"].as<std::string>();
-    auto val2 = req["val2"].as<int>();
+    auto height = req["height"].as<uint32_t>();
 
-    SYSLOG("Deserialized val1: %s, val2: %u", val1.c_str(), val2);
+    if((height < 70) || (height > 120))
+        return {400, ""};
 
-    StaticJsonDocument<256> resp;
-    std::string respStr;
+    DeskCtrl::GetInstance()->CmdDeskCalibrate(height);
 
-    resp["sensor"] = "gps";
-    resp["time"]   = 1351824120;
-    resp["data"][0] = 48.756080;
-    resp["data"][1] = 2.302038;
-
-    serializeJson(resp, respStr);
-
-    return {200, respStr};
+    return {200, ""};
 }
 
 Api::Api()
