@@ -11,6 +11,9 @@ public:
     std::string GetAddr();
 
 private:
+    static constexpr const char* AP_SSID = "DeskCtrl";
+    static constexpr const char* AP_PASS = "LubiePlacki666";
+
     bool m_connected = false;
     HttpServer m_server;
 };

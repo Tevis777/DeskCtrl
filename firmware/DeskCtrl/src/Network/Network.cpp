@@ -3,14 +3,8 @@
 #include <ESP8266WiFi.h>
 #include <string>
 
-void Network::Connect(const char* ssid, const char* pass)
+static std::string IpToStr(IPAddress ip)
 {
-    WiFi.begin(ssid, pass);
-}
-
-std::string Network::GetAddr()
-{
-    auto ip = WiFi.localIP();
     uint32_t cursor = 0;
     char buff[48] = {0};
 
@@ -23,7 +17,21 @@ std::string Network::GetAddr()
     }
     
     return std::string(buff);
+}
 
+void Network::Connect(const char* ssid, const char* pass)
+{
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(AP_SSID, AP_PASS);
+
+    SYSLOG("Wifi AP launched on %s", IpToStr(WiFi.softAPIP()).c_str());
+
+    WiFi.begin(ssid, pass);
+}
+
+std::string Network::GetAddr()
+{
+    return IpToStr(WiFi.localIP());
 }
 
 void Network::Pool()
@@ -32,7 +40,7 @@ void Network::Pool()
     {
         if(m_connected)
         {
-            SYSLOG("Wifi connection lost");
+            SYSLOG("Wifi STA connection lost");
             m_connected = false;
         }
 
@@ -42,7 +50,7 @@ void Network::Pool()
     {
         if(!m_connected)
         {
-            SYSLOG("Wifi connection established (%s)", GetAddr().c_str());
+            SYSLOG("Wifi STA connection established (%s)", GetAddr().c_str());
             m_connected = true;
             m_server.Init();
         }
