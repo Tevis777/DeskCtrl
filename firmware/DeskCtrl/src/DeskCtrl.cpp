@@ -69,7 +69,7 @@ void DeskCtrl::Init()
                                         });
 
     
-    //m_network.Connect("UPC2012", "LubiePlacki666");
+    m_network.Connect("UPC2012", "LubiePlacki666");
 
     m_presets.push_back(80);
     m_presets.push_back(95);
@@ -88,13 +88,14 @@ void DeskCtrl::Process()
     if((counter % 1000) == 0)
     {
         m_ledBoard.Toggle();
+        SYSLOG("ALIVE");
     }
 
     if((counter % 100) == 0)
     {
         m_buttonUp.Pool();
         m_buttonDown.Pool();
-       // m_network.Pool();
+        m_network.Pool();
     }
 
     if((counter % 10) == 0)

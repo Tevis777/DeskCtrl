@@ -5,7 +5,25 @@
 
 Motor* Motor::s_instance = nullptr;
 
-void Motor::OnTimerISR()
+volatile static IRAM_ATTR Motor::EDir m_dir;
+volatile static IRAM_ATTR uint32_t m_position;
+
+static void ICACHE_RAM_ATTR OnMotorISR()
+{
+    digitalWrite(D7, digitalRead(D7) ? LOW : HIGH);
+
+    if(m_dir == Motor::EDir::Down)
+    {
+        m_position--;
+    }
+    else
+    {
+        m_position++;
+    }
+
+}
+
+void ICACHE_RAM_ATTR Motor::OnTimerISR()
 {
     s_instance->HandleTick();
 }
@@ -20,7 +38,7 @@ void Motor::Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
 
     PhySetup();
 
-    timer1_attachInterrupt(OnTimerISR);
+    timer1_attachInterrupt(OnMotorISR);
     timer1_disable();
 
     SYSLOG("Motor initialized");
@@ -76,7 +94,7 @@ void Motor::Stop()
     SYSLOG("Motor stop request");
 }
 
-void Motor::HandleTick()
+void ICACHE_RAM_ATTR Motor::HandleTick()
 {
     PhyPull();
 

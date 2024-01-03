@@ -71,7 +71,7 @@ private:
     void HandleTick();
     void SetSpeed(uint32_t freq);
 
-    volatile uint32_t m_position;
+    
     uint32_t m_selectedPos = UINT32_MAX;
 
     const char* GetDirStr(EDir dir);
@@ -86,10 +86,10 @@ private:
 
     std::shared_ptr<Request> m_request;
 
-    EDir m_dir;
+    
 
 
-    uint8_t m_pinPull;
+    volatile uint8_t m_pinPull;
     uint8_t m_pinEn;
     uint8_t m_pinDir;
     uint32_t m_freq;
