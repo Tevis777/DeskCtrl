@@ -100,7 +100,7 @@ void HttpServer::Pool()
     std::string reqMethod;
     std::string reqPath;
     std::string reqBody;
-    uint32_t contentLen;
+    uint32_t contentLen = 0;
     ApiResult result;
 
     while(client.connected())
@@ -142,7 +142,15 @@ void HttpServer::Pool()
 
                 if(name.empty())
                 {
-                    state = EState::ReqBody;
+                    if(contentLen > 0)
+                    {
+                        state = EState::ReqBody;
+                    }
+                    else
+                    {
+                        state = EState::Handler;
+                    }
+                    
                     tmp = "";
                     break;
                 }

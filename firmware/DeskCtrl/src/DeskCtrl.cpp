@@ -206,7 +206,7 @@ void DeskCtrl::CmdDeskGoDownToNextPreset()
 
 void DeskCtrl::CmdDeskGoTo(Motor::Height height)
 {
-
+    m_motor.StartDst(height);
 }
 
 void DeskCtrl::CmdDeskStop()
