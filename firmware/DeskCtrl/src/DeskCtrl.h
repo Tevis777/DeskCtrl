@@ -33,9 +33,9 @@ public:
     void CmdDeskGoUpToNextPreset();
     void CmdDeskGoDown();
     void CmdDeskGoDownToNextPreset();
-    void CmdDeskGoTo(uint32_t height);
+    void CmdDeskGoTo(Motor::Height height);
     void CmdDeskStop();
-    void CmdDeskCalibrate(uint32_t height);
+    void CmdDeskCalibrate(Motor::Height height);
 
 
 private:

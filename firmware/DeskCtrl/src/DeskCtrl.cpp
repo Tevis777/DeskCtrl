@@ -88,7 +88,6 @@ void DeskCtrl::Process()
     if((counter % 1000) == 0)
     {
         m_ledBoard.Toggle();
-        SYSLOG("ALIVE");
     }
 
     if((counter % 100) == 0)
@@ -156,9 +155,9 @@ void DeskCtrl::OnMotorStart()
 
 }
 
-void DeskCtrl::OnMotorStop(uint32_t position)
+void DeskCtrl::OnMotorStop(Motor::Steps steps)
 {
-    m_storage.SavePosition(position);
+    m_storage.SavePosition(steps);
 }
 
 /*****************************************************************************************************************/
@@ -166,7 +165,7 @@ void DeskCtrl::OnMotorStop(uint32_t position)
 /*****************************************************************************************************************/
 void DeskCtrl::CmdDeskGoUp()
 {
-    m_motor.StartManual(Motor::EDir::Up);
+    m_motor.StartManual(Motor::EDirection::Up);
 }
 
 void DeskCtrl::CmdDeskGoUpToNextPreset()
@@ -185,7 +184,7 @@ void DeskCtrl::CmdDeskGoUpToNextPreset()
 
 void DeskCtrl::CmdDeskGoDown()
 {
-    m_motor.StartManual(Motor::EDir::Down);
+    m_motor.StartManual(Motor::EDirection::Down);
 }
 
 void DeskCtrl::CmdDeskGoDownToNextPreset()
@@ -205,7 +204,7 @@ void DeskCtrl::CmdDeskGoDownToNextPreset()
     }
 }
 
-void DeskCtrl::CmdDeskGoTo(uint32_t height)
+void DeskCtrl::CmdDeskGoTo(Motor::Height height)
 {
 
 }
@@ -215,10 +214,8 @@ void DeskCtrl::CmdDeskStop()
     m_motor.Stop();
 }
 
-void DeskCtrl::CmdDeskCalibrate(uint32_t height)
+void DeskCtrl::CmdDeskCalibrate(Motor::Height height)
 {
-    auto position = Motor::HeightToPos(height);
-
-    m_motor.Calibrate(position);
-    m_storage.SavePosition(position);
+    m_motor.Calibrate(height);
+    m_storage.SavePosition(Motor::HeightToSteps(height));
 }

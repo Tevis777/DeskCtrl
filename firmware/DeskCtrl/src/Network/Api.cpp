@@ -14,7 +14,7 @@ static ApiResult Api_Calibration(const std::string& body)
     if(res != DeserializationError::Code::Ok)
         return {400, ""};
 
-    auto height = req["height"].as<uint32_t>();
+    auto height = req["height"].as<float>();
 
     if((height < 70) || (height > 120))
         return {400, ""};

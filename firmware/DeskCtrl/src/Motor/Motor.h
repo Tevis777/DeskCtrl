@@ -7,28 +7,35 @@
 class Motor
 {
 public:
-    enum class EDir
+    enum class EDirection
     {
         Unknown,
         Down,
         Up
     };
 
+    using Steps = uint32_t;
+    using Height = float;
+
+    static constexpr Steps STEPS_NONE = UINT32_MAX;
+
     void Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull);
-    void Stop();
     void Pool(uint32_t interval);
 
-    void StartDst(uint32_t height);
-    void StartManual(EDir dir);
+    void StartDst(Height height);
+    void StartManual(EDirection direction);
+    void Stop();
 
-    bool IsActive();
-    uint32_t GetHeight();
+    void Calibrate(Steps steps);
+    void Calibrate(Height height);
 
-    void Calibrate(uint32_t position);
+    bool IsActive() const;
 
-    static uint32_t PosToHeight(uint32_t pos);
-    static uint32_t HeightToPos(uint32_t height);
-  
+    Height GetHeight() const;
+    Steps GetSteps() const;
+
+    static Height StepsToHeight(Steps steps);
+    static Steps HeightToSteps(Height height);
 
 private:
     static Motor* s_instance;
@@ -44,58 +51,30 @@ private:
     struct Request
     {
         EState type;
-        EDir dir;
-        uint32_t position;
+        EDirection dir;
+        Steps stepPos;
     };
 
+    static constexpr Height HEIGHT_MAX = 120; //[cm]
+    static constexpr Height HEIGHT_MIN = 70; //[cm]
 
+    static constexpr Steps TOTAL_STEPS = 44800;
 
-    static constexpr uint32_t HEIGHT_MAX = 120; //[cm]
-    static constexpr uint32_t HEIGHT_MIN = 70; //[cm]
-
-    static constexpr uint32_t TOTAL_STEPS = 44800;
-
-    static constexpr uint32_t STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN));
-    static constexpr uint32_t LIMIT_MARGIN = 2000;
+    static constexpr Steps STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN));
+    static constexpr Steps LIMIT_MARGIN = 2000;
 
     static constexpr uint32_t START_TIME = 500; //[ms]
 
     static constexpr uint32_t INIT_FREQ = 128;
     static constexpr uint32_t WORK_FREQ = 896;
-    static constexpr uint32_t PRESCALER = 256;
 
-    static uint32_t FreqToTimerVal(uint32_t freq);
-
-    static void OnTimerISR();
-
-    void HandleTick();
     void SetSpeed(uint32_t freq);
-
-    
-    uint32_t m_selectedPos = UINT32_MAX;
-
-    const char* GetDirStr(EDir dir);
-
-
-
-    void PhySetup();
-    void PhyEnable(bool enabled);
-    void PhySetDir(EDir dir);
-    void PhyPull();
-
 
     std::shared_ptr<Request> m_request;
 
-    
-
-
-    volatile uint8_t m_pinPull;
-    uint8_t m_pinEn;
-    uint8_t m_pinDir;
-    uint32_t m_freq;
-    bool m_restart;
-
     EState m_state = EState::Idle;
+    Steps m_selectedPos = STEPS_NONE;
+    uint32_t m_freq;
 };
 
 #endif // _MOTOR_H_
