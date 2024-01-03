@@ -5,6 +5,18 @@
 
 using namespace ArduinoJson;
 
+static ApiResult Api_GET_Health(const std::string& body)
+{
+    StaticJsonDocument<512> resp;
+    std::string respTxt;
+
+    resp["status"] = "ok";
+
+    serializeJson(resp, respTxt);
+
+    return {200, respTxt};
+}
+
 static ApiResult Api_POST_Calibration(const std::string& body)
 {
     StaticJsonDocument<256> req;
@@ -78,6 +90,7 @@ static ApiResult Api_POST_DriveStop(const std::string& body)
 
 Api::Api()
 {
+    m_requests.push_back({"GET", "/health", Api_GET_Health});
     m_requests.push_back({"POST", "/calibration", Api_POST_Calibration});
     m_requests.push_back({"POST", "/drive/height", Api_POST_DriveHeight});
     m_requests.push_back({"POST", "/drive/direction", Api_POST_DriveDirection});
