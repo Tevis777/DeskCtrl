@@ -10,6 +10,12 @@ public:
     struct Data
     {
 
+        char wifiSsid[32];
+        char wifiPass[32];
+        char wifiIp[24];
+        char wifiGateway[24];
+        char wifiSubnet[24];
+        uint32_t presets[10];
 
 
     };

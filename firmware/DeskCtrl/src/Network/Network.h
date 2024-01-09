@@ -6,13 +6,13 @@
 class Network
 {
 public:
-    void Connect(const char* ssid, const char* pass);
+    void Connect(const char* ssid, const char* pass, const char* ip, const char* gateway, const char* subnet);
     void Pool();
     std::string GetAddr();
 
 private:
 
-    static constexpr const char* AP_IP = "192.168.0.1";
+    static constexpr const char* AP_IP = "192.168.10.1";
     static constexpr const char* AP_SUBNET = "255.255.255.0";
     static constexpr const char* AP_SSID = "DeskCtrl";
     static constexpr const char* AP_PASS = "LubiePlacki666";

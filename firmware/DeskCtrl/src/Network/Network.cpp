@@ -45,18 +45,17 @@ static IPAddress StrToIp(const std::string& str)
     return IPAddress(vals[0], vals[1], vals[2], vals[3]);
 }
 
-void Network::Connect(const char* ssid, const char* pass)
+void Network::Connect(const char* ssid, const char* pass, const char* ip, const char* gateway, const char* subnet)
 {
-   // WiFi.config();
-
     WiFi.mode(WIFI_AP_STA);
 
     WiFi.softAPConfig(StrToIp(AP_IP), StrToIp(AP_IP), StrToIp(AP_SUBNET));
     WiFi.softAP(AP_SSID, AP_PASS);
 
-    SYSLOG("Wifi AP launched on %s", IpToStr(WiFi.softAPIP()).c_str());
-
+    WiFi.config(StrToIp(ip), StrToIp(gateway), StrToIp(subnet), StrToIp(gateway), StrToIp(gateway));
     WiFi.begin(ssid, pass);
+
+    SYSLOG("Wifi AP launched on %s", IpToStr(WiFi.softAPIP()).c_str());
 }
 
 std::string Network::GetAddr()

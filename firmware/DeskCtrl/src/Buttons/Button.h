@@ -26,6 +26,7 @@ public:
     bool IsPressed();
 
 private:
+    static constexpr uint32_t STARTUP_TIMEOUT = 1000; //[ms]
     static constexpr uint32_t DEBOUNCE_TIMEOUT = 50; //[ms]
     const char* m_name;
     uint8_t m_pin;

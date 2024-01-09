@@ -8,6 +8,7 @@ void Button::Init(const char* name, uint8_t pin, EActive active, Handler handler
     m_pin = pin;
     m_handler = handler;
     m_active = active;
+    m_timer = STARTUP_TIMEOUT;
 
     SYSLOG("Button init (%s)", m_name);
     pinMode(m_pin, INPUT);

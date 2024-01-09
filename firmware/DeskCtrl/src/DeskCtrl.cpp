@@ -69,7 +69,11 @@ void DeskCtrl::Init()
                                         });
 
     
-    m_network.Connect("UPC2012", "LubiePlacki666");
+    auto ip = "192.168.0.115";
+    auto gateway = "192.168.0.1";
+    auto subnet = "255.255.255.0";
+
+    m_network.Connect("UPC2012", "LubiePlacki666", ip, gateway, subnet);
 
     m_presets.push_back(80);
     m_presets.push_back(95);
