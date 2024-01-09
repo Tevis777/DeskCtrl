@@ -295,7 +295,7 @@ void Motor::Pool(uint32_t interval)
         }
         else
         {
-            if((StepPos + STEPS_MARGIN + stopSteps) >= TOTAL_STEPS)
+            if((StepPos + STEPS_MARGIN + stopSteps) >= STEPS_TOTAL)
             {
                 m_state = EState::Stopping;
                 m_request = {};

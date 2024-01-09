@@ -59,16 +59,14 @@ private:
     static constexpr Height HEIGHT_MIN = 70; //[cm]
     static constexpr Height HEIGHT_MARGIN = 1; //[cm]
 
-    static constexpr Steps TOTAL_STEPS = 43500; //[Steps]
-
-    static constexpr Steps STEPS_PER_CM = (TOTAL_STEPS / (HEIGHT_MAX - HEIGHT_MIN)); //[Steps]
+    static constexpr Steps STEPS_TOTAL = 43500; //[Steps]
+    static constexpr Steps STEPS_PER_CM = (STEPS_TOTAL / (HEIGHT_MAX - HEIGHT_MIN)); //[Steps]
     static constexpr Steps STEPS_MARGIN = (STEPS_PER_CM * HEIGHT_MARGIN); //[Steps]
-
 
     static constexpr uint32_t START_TIME = 500; //[ms]
 
-    static constexpr uint32_t INIT_FREQ = 128; //[Hz]
-    static constexpr uint32_t WORK_FREQ = 896; //[Hz]
+    static constexpr uint32_t INIT_FREQ = 100; //[Hz]
+    static constexpr uint32_t WORK_FREQ = 1000; //[Hz]
 
     Steps GetStopSteps(uint32_t interval);
 
