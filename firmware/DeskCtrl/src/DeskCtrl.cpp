@@ -92,13 +92,13 @@ void DeskCtrl::Process()
 
     if((counter % 100) == 0)
     {
-        m_buttonUp.Pool();
-        m_buttonDown.Pool();
         m_network.Pool();
     }
 
     if((counter % 10) == 0)
     {
+        m_buttonUp.Pool(10);
+        m_buttonDown.Pool(10);
         m_motor.Pool(10);
     }
 }
