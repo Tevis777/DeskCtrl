@@ -59,9 +59,9 @@ private:
     static constexpr Height HEIGHT_MIN = 70; //[cm]
     static constexpr Height HEIGHT_MARGIN = 2; //[cm]
 
-    static constexpr Steps TOTAL_STEPS = 44800; //[Steps]
+    static constexpr Steps TOTAL_STEPS = 43500; //[Steps]
 
-    static constexpr Steps STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN)); //[Steps]
+    static constexpr Steps STEPS_PER_CM = (TOTAL_STEPS / (HEIGHT_MAX - HEIGHT_MIN)); //[Steps]
     static constexpr Steps STEPS_MARGIN = (STEPS_PER_CM * HEIGHT_MARGIN); //[Steps]
 
 
