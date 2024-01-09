@@ -68,8 +68,6 @@ private:
     static constexpr uint32_t INIT_FREQ = 128;
     static constexpr uint32_t WORK_FREQ = 896;
 
-    void SetSpeed(uint32_t freq);
-
     std::shared_ptr<Request> m_request;
 
     EState m_state = EState::Idle;

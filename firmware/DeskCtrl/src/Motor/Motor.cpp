@@ -44,7 +44,7 @@ static inline void PhySetup(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
 /*****************************************************************************************************************/
 /*                                                  TIMER ISR                                                    */
 /*****************************************************************************************************************/
-static void ICACHE_RAM_ATTR MotorISRHandler()
+static void ICACHE_RAM_ATTR MotorTimerISRHandler()
 {
     PhyPull();
 
@@ -58,28 +58,58 @@ static void ICACHE_RAM_ATTR MotorISRHandler()
     }
 }
 
-static inline uint32_t MotorISRFreqToVal(uint32_t freq)
+static inline uint32_t MotorTimerFreqToVal(uint32_t freq)
 {
     static constexpr uint32_t PRESCALER = 256;
 
     return ((F_CPU / PRESCALER) / freq);
 }
 
-static inline void MotorISRInit()
+static inline void MotorTimerInit()
 {
-    timer1_attachInterrupt(MotorISRHandler);
+    timer1_attachInterrupt(MotorTimerISRHandler);
     timer1_disable();
 }
 
-static inline void MotorISRDisable()
+static inline void MotorTimerDisable()
 {
     timer1_disable();
 }
 
-static inline void MotorISRSetup(uint32_t freq)
+static inline void MotorTimerSetup(uint32_t freq)
 {       
-    timer1_write(MotorISRFreqToVal(freq));
+    timer1_write(MotorTimerFreqToVal(freq));
     timer1_enable(TIM_DIV256, TIM_EDGE, TIM_LOOP);
+}
+
+
+/*****************************************************************************************************************/
+/*                                                    MOTOR                                                      */
+/*****************************************************************************************************************/
+static inline void MotorInit(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
+{
+    PhySetup(pinEn, pinDir, pinPull);
+    MotorTimerInit();
+}
+
+static inline void MotorStart(uint32_t freq)
+{
+    PhyEnable(true);
+    delay(200);
+    PhySetDir(Direction);
+    delay(1);
+    MotorTimerSetup(freq);
+}
+
+static inline void MotorAdjust(uint32_t freq)
+{
+    MotorTimerSetup(freq);
+}
+
+static inline void MotorStop()
+{
+    MotorTimerDisable();
+    PhyEnable(false);
 }
 
 /*****************************************************************************************************************/
@@ -89,8 +119,7 @@ void Motor::Init(uint8_t pinEn, uint8_t pinDir, uint8_t pinPull)
 {
     s_instance = this;
 
-    PhySetup(pinEn, pinDir, pinPull);
-    MotorISRInit();
+    MotorInit(pinEn, pinDir, pinPull);
 
     SYSLOG("Motor initialized");
 }
@@ -166,24 +195,9 @@ Motor::Steps Motor::GetSteps() const
 }
 
 
-
 /*****************************************************************************************************************/
 /*                                                   PROCESSING                                                  */
 /*****************************************************************************************************************/
-void Motor::SetSpeed(uint32_t freq)
-{
-    if(freq == 0)
-    {
-        MotorISRDisable();
-        PhyEnable(false);
-    }
-    else
-    {
-        PhyEnable(true);
-        MotorISRSetup(freq);
-    }
-}
-
 void Motor::Pool(uint32_t interval)
 {
     if(m_request) //Handle external request
@@ -207,8 +221,7 @@ void Motor::Pool(uint32_t interval)
                 m_state = EState::Starting;
                 m_freq = INIT_FREQ;
                 Direction = reqDir;
-                PhySetDir(Direction);
-                SetSpeed(INIT_FREQ);
+                MotorStart(INIT_FREQ);
                 m_request = {};
                 SYSLOG("Motor starting");
             }
@@ -276,7 +289,7 @@ void Motor::Pool(uint32_t interval)
         if(m_freq < WORK_FREQ)
         {
             m_freq += (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
-            SetSpeed(m_freq);
+            MotorAdjust(m_freq);
         }
 
         if(m_freq >= WORK_FREQ)
@@ -290,12 +303,12 @@ void Motor::Pool(uint32_t interval)
         if(m_freq > INIT_FREQ)
         {
             m_freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
-            SetSpeed(m_freq);
+            MotorAdjust(m_freq);
         }
 
         if(m_freq <= INIT_FREQ)
         {
-            SetSpeed(0);
+            MotorStop();
             m_state = EState::Idle;
             m_selectedPos = UINT32_MAX;
             SYSLOG("Motor stopped (height:%.1f)", StepsToHeight(StepPos));
