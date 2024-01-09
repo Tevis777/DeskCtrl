@@ -57,16 +57,20 @@ private:
 
     static constexpr Height HEIGHT_MAX = 120; //[cm]
     static constexpr Height HEIGHT_MIN = 70; //[cm]
+    static constexpr Height HEIGHT_MARGIN = 2; //[cm]
 
-    static constexpr Steps TOTAL_STEPS = 44800;
+    static constexpr Steps TOTAL_STEPS = 44800; //[Steps]
 
-    static constexpr Steps STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN));
-    static constexpr Steps LIMIT_MARGIN = 2000;
+    static constexpr Steps STEPS_PER_CM = (44800 / (HEIGHT_MAX - HEIGHT_MIN)); //[Steps]
+    static constexpr Steps STEPS_MARGIN = (STEPS_PER_CM * HEIGHT_MARGIN); //[Steps]
+
 
     static constexpr uint32_t START_TIME = 500; //[ms]
 
-    static constexpr uint32_t INIT_FREQ = 128;
-    static constexpr uint32_t WORK_FREQ = 896;
+    static constexpr uint32_t INIT_FREQ = 128; //[Hz]
+    static constexpr uint32_t WORK_FREQ = 896; //[Hz]
+
+    Steps GetStopSteps(uint32_t interval);
 
     std::shared_ptr<Request> m_request;
 

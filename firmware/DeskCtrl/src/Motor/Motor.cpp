@@ -198,6 +198,20 @@ Motor::Steps Motor::GetSteps() const
 /*****************************************************************************************************************/
 /*                                                   PROCESSING                                                  */
 /*****************************************************************************************************************/
+Motor::Steps Motor::GetStopSteps(uint32_t interval)
+{
+    uint32_t freq = m_freq;
+    Steps steps = 0;
+
+    while(freq > INIT_FREQ)
+    {
+        steps += (freq * interval) / 1000;
+        freq -= (WORK_FREQ - INIT_FREQ) / (START_TIME / interval);
+    }
+
+    return steps;
+}
+
 void Motor::Pool(uint32_t interval)
 {
     if(m_request) //Handle external request
@@ -255,11 +269,17 @@ void Motor::Pool(uint32_t interval)
     {
         if((m_state == EState::Idle) || (m_state == EState::Running))
         {
-            if((Direction == EDirection::Up) && (StepPos >= m_selectedPos))
+            if((Direction == EDirection::Up) && ((StepPos + GetStopSteps(interval))>= m_selectedPos))
+            {
+                SYSLOG("Stop steps: %u", GetStopSteps(interval));
                 m_state = EState::Stopping;
+            }
 
-            if((Direction == EDirection::Down) && (StepPos <= m_selectedPos))
+            if((Direction == EDirection::Down) && (StepPos <= (m_selectedPos + + GetStopSteps(interval))))
+            {
+                SYSLOG("Stop steps: %u", GetStopSteps(interval));
                 m_state = EState::Stopping;
+            }
         }
     }
 
@@ -267,7 +287,7 @@ void Motor::Pool(uint32_t interval)
     {
         if(Direction == EDirection::Down) //Handle absolute limits
         {
-            if(StepPos <= LIMIT_MARGIN)
+            if(StepPos <= STEPS_MARGIN)
             {
                 m_state = EState::Stopping;
                 m_request = {};
@@ -275,7 +295,7 @@ void Motor::Pool(uint32_t interval)
         }
         else
         {
-            if((StepPos + LIMIT_MARGIN) >= TOTAL_STEPS)
+            if((StepPos + STEPS_MARGIN) >= TOTAL_STEPS)
             {
                 m_state = EState::Stopping;
                 m_request = {};

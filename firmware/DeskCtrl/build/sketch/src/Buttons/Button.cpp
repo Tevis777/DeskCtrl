@@ -5,14 +5,14 @@
 
 void Button::Init(const char* name, uint8_t pin, EActive active, Handler handler)
 {
-  m_name = name;
-  m_pin = pin;
-  m_handler = handler;
-  m_active = active;
+    m_name = name;
+    m_pin = pin;
+    m_handler = handler;
+    m_active = active;
 
-  SYSLOG("Button init (%s)", m_name);
-  pinMode(m_pin, INPUT);
-  m_prev = IsPressed();
+    SYSLOG("Button init (%s)", m_name);
+    pinMode(m_pin, INPUT);
+    m_prev = IsPressed();
 }
 
 void Button::Pool(uint32_t interval)
