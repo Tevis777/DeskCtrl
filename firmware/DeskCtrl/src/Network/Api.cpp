@@ -11,6 +11,7 @@ static ApiResult Api_GET_Health(const std::string& body)
     std::string respTxt;
 
     resp["status"] = "ok";
+    resp["height"] = DeskCtrl::GetInstance()->GetMotor().GetHeight();
 
     serializeJson(resp, respTxt);
 

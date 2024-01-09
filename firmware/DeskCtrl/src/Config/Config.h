@@ -7,16 +7,18 @@
 class Config
 {
 public:
-  static constexpr uint32_t MAX_PRESETS = 4;
-
-  void SavePreset(uint32_t preset);
-  void DeletePreset(uint32_t preset);
-
-  std::vector<uint32_t> GetPresets(void);
+    struct Data
+    {
 
 
+
+    };
+
+    Data data;
+
+    // void Save();
+    // void Load();
 private:
-
 
 };
 

@@ -37,6 +37,9 @@ public:
     void CmdDeskStop();
     void CmdDeskCalibrate(Motor::Height height);
 
+    Motor& GetMotor();
+    MotorPower& GetMotorPower();
+    Network& GetNetwork();
 
 private:
     static DeskCtrl* s_instance;

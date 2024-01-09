@@ -219,3 +219,21 @@ void DeskCtrl::CmdDeskCalibrate(Motor::Height height)
     m_motor.Calibrate(height);
     m_storage.SavePosition(Motor::HeightToSteps(height));
 }
+
+/*****************************************************************************************************************/
+/*                                                   GETTERS                                                     */
+/*****************************************************************************************************************/
+Motor& DeskCtrl::GetMotor()
+{
+    return m_motor;
+}
+
+MotorPower& DeskCtrl::GetMotorPower()
+{
+    return m_motorPower;
+}
+
+Network& DeskCtrl::GetNetwork()
+{
+    return m_network;
+}

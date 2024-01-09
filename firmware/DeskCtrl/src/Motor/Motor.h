@@ -66,7 +66,7 @@ private:
     static constexpr uint32_t START_TIME = 500; //[ms]
 
     static constexpr uint32_t INIT_FREQ = 100; //[Hz]
-    static constexpr uint32_t WORK_FREQ = 1000; //[Hz]
+    static constexpr uint32_t WORK_FREQ = 900; //[Hz]
 
     Steps GetStopSteps(uint32_t interval);
 

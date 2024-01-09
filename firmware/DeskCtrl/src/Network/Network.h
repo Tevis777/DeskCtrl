@@ -11,6 +11,9 @@ public:
     std::string GetAddr();
 
 private:
+
+    static constexpr const char* AP_IP = "192.168.0.1";
+    static constexpr const char* AP_SUBNET = "255.255.255.0";
     static constexpr const char* AP_SSID = "DeskCtrl";
     static constexpr const char* AP_PASS = "LubiePlacki666";
 
