@@ -214,6 +214,8 @@ Motor::Steps Motor::GetStopSteps(uint32_t interval)
 
 void Motor::Pool(uint32_t interval)
 {
+    auto stopSteps = GetStopSteps(interval);
+
     if(m_request) //Handle external request
     {
         EDirection reqDir;
@@ -269,15 +271,13 @@ void Motor::Pool(uint32_t interval)
     {
         if((m_state == EState::Idle) || (m_state == EState::Running))
         {
-            if((Direction == EDirection::Up) && ((StepPos + GetStopSteps(interval))>= m_selectedPos))
+            if((Direction == EDirection::Up) && ((StepPos + stopSteps)>= m_selectedPos))
             {
-                SYSLOG("Stop steps: %u", GetStopSteps(interval));
                 m_state = EState::Stopping;
             }
 
-            if((Direction == EDirection::Down) && (StepPos <= (m_selectedPos + + GetStopSteps(interval))))
+            if((Direction == EDirection::Down) && (StepPos <= (m_selectedPos + stopSteps)))
             {
-                SYSLOG("Stop steps: %u", GetStopSteps(interval));
                 m_state = EState::Stopping;
             }
         }
@@ -287,7 +287,7 @@ void Motor::Pool(uint32_t interval)
     {
         if(Direction == EDirection::Down) //Handle absolute limits
         {
-            if(StepPos <= STEPS_MARGIN)
+            if(StepPos <= (STEPS_MARGIN + stopSteps))
             {
                 m_state = EState::Stopping;
                 m_request = {};
@@ -295,7 +295,7 @@ void Motor::Pool(uint32_t interval)
         }
         else
         {
-            if((StepPos + STEPS_MARGIN) >= TOTAL_STEPS)
+            if((StepPos + STEPS_MARGIN + stopSteps) >= TOTAL_STEPS)
             {
                 m_state = EState::Stopping;
                 m_request = {};

@@ -57,7 +57,7 @@ private:
 
     static constexpr Height HEIGHT_MAX = 120; //[cm]
     static constexpr Height HEIGHT_MIN = 70; //[cm]
-    static constexpr Height HEIGHT_MARGIN = 2; //[cm]
+    static constexpr Height HEIGHT_MARGIN = 1; //[cm]
 
     static constexpr Steps TOTAL_STEPS = 43500; //[Steps]
 
