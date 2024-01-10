@@ -13,13 +13,14 @@
         }
 		
 		button {
-			margin-bottom: 12px;
+			margin-bottom: 7px;
 			height:20px;
-			width:60px;
+			width:70px;
 		}
 		
 		input {
 			margin-right: 5px;
+			margin-bottom: 7px;
 		}
 		
 		label {
@@ -46,71 +47,70 @@
 
     </style>
 </head>
-<body onload="initializePage()">
+<body onload="reload()">
 
 	<h1>Awesome Desk Controller &reg;</h1>
 
     <h2>Drive manual</h2>
 	<div id="driveManual">
-		<button onclick="driveDirection('up')">&uarr;</button>
+		<button onclick="driveDirection('up')" style="width: 100px; height: 25px">&uarr;</button>
 		<br>
-		<button onclick="driveStop()">--</button>
+		<button onclick="driveStop()" style="width: 100px; height: 25px">--</button>
 		<br>
-		<button onclick="driveDirection('down')">&darr;</button>
+		<button onclick="driveDirection('down')" style="width: 100px; height: 25px">&darr;</button>
 	</div>
 	
     <h2>Drive to</h2>
 	<div id="driveTo">
 		<input type="text" id="driveToEntry">
-		<button onclick="driveDirection('down')">Go</button>
+		<button onclick="driveTo(-1)">Go</button>
 	</div>
 	
     <h2>Presets</h2>
     <div id="presetsColumn">
     </div>
-    <button onclick="savePresets()">Save</button>
+    <button onclick="savePresets()" style="margin-top: 10px; width: 100px">Save</button>
 	
-
     <h2>Calibration</h2>
     <div>
 		<table>
 			<tr>
-				<td><label for="calibrateHeight">Height:</label></td>
-				<td><input type="text" id="calibrateHeight"></td>
+				<td><label for="heightEntry">Height:</label></td>
+				<td><input type="text" id="heightEntry"></td>
 			</tr>
 		</table>
-        <button onclick="saveCalibration()">Save</button>
+        <button onclick="saveCalibration()" style="width: 100px">Save</button>
     </div>
 
     <h2>Network</h2>
     <div id="networkSection">
 		<table>
 			<tr>
-				<td><label for="wifiSsid">Wifi ssid:</label></td>
-				<td><input type="text" id="wifiSsid"></td>
+				<td><label for="wifiSsidEntry">Wifi ssid:</label></td>
+				<td><input type="text" id="wifiSsidEntry"></td>
 			</tr>
 			<tr>
-				<td><label for="wifiPass">Wifi pass:</label></td>
-				<td><input type="password" id="wifiPass"></td>
+				<td><label for="wifiPassEntry">Wifi pass:</label></td>
+				<td><input type="password" id="wifiPassEntry"></td>
 			</tr>
 			<tr>
-				<td><label for="ip">IP:</label></td>
-				<td><input type="text" id="ip"></td>
+				<td><label for="ipEntry">IP:</label></td>
+				<td><input type="text" id="ipEntry"></td>
 			</tr>
 			<tr>
-				<td><label for="subnet">Subnet:</label></td>
-				<td><input type="text" id="subnet"></td>
+				<td><label for="subnetEntry">Subnet:</label></td>
+				<td><input type="text" id="subnetEntry"></td>
 			</tr>
 		</table>
-		<button onclick="saveNetwork()">Save</button>
+		<button onclick="saveNetwork()" style="width: 100px">Save</button>
     </div>
 
     <script>
 		var IP_ADDR = "http://192.168.0.115"
 	
-        function initializePage() {
+        function reload() {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://192.168.0.115/health', true);
+            xhr.open('GET', IP_ADDR + '/health', true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = JSON.parse(xhr.responseText);
@@ -121,36 +121,44 @@
         }
 
         function updateUI(data) {
-            document.getElementById('calibrateHeight').value = data.height;
+            document.getElementById('heightEntry').value = data.height;
+            document.getElementById('wifiSsidEntry').value = data.wifiSsid;
+            document.getElementById('wifiPassEntry').value = data.wifiPass;
+            document.getElementById('ipEntry').value = data.ip;
+            document.getElementById('subnetEntry').value = data.subnet;
+			
+			var presetsColumn = document.getElementById('presetsColumn');
+			var presetCnt = data.presetsCount;
+			var presets = data.presets;
 
-            document.getElementById('wifiSsid').value = data.wifiSsid;
-            document.getElementById('wifiPass').value = data.wifiPass;
-            document.getElementById('ip').value = data.ip;
-            document.getElementById('subnet').value = data.subnet;
-
-            // Clear previous entries and buttons
-            var presetsColumn = document.getElementById('presetsColumn');
             presetsColumn.innerHTML = '';
-
-            // Create entries and buttons for presets
-            data.presets.forEach(function (preset) {
+			
+			for(let i = 0; i < presetCnt; i++)
+			{
                 var entry = document.createElement('input');
                 entry.type = 'text';
-                entry.value = preset;
-
-                // Add margin-bottom to create space between entries
-           
-                var goButton = document.createElement('button');
-                goButton.innerText = 'Go';
-				goButton.style = "margin-left: 5px"
-                goButton.onclick = function () {
-                    sendHeightPreset(preset);
-                };
-
-                presetsColumn.appendChild(entry);
-                presetsColumn.appendChild(goButton);
-                presetsColumn.appendChild(document.createElement('br'));
-            });
+			
+				if(i < presets.length)
+				{
+					entry.value = presets[i];
+					
+					var goButton = document.createElement('button');
+					goButton.innerText = 'Go';
+					goButton.style = "margin-left: 5px"
+					goButton.onclick = function () {
+						driveTo(i);
+					};
+				}
+				
+				presetsColumn.appendChild(entry);
+				
+				if(i < presets.length)
+				{
+					presetsColumn.appendChild(goButton);
+				}
+				
+				presetsColumn.appendChild(document.createElement('br'));
+			}
         }
 
         function savePresets() {
@@ -162,7 +170,7 @@
             });
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/config', true);
+            xhr.open('POST', IP_ADDR + '/config', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             xhr.onreadystatechange = function () {
@@ -174,9 +182,23 @@
             xhr.send(JSON.stringify({ presets: presets }));
         }
 
+        function driveTo(source) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', IP_ADDR + '/drive/height', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Height preset sent successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ height: height }));
+        }
+
         function driveDirection(direction) {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/drive/direction', true);
+            xhr.open('POST', IP_ADDR + '/drive/direction', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             xhr.onreadystatechange = function () {
@@ -190,7 +212,7 @@
 
         function driveStop() {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/drive/stop', true);
+            xhr.open('POST', IP_ADDR + '/drive/stop', true);
 
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
@@ -202,10 +224,10 @@
         }
 
         function saveCalibration() {
-            var height = document.getElementById('calibrateHeight').value;
+            var heightVal = document.getElementById('calibrateHeight').value;
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/calibration', true);
+            xhr.open('POST', IP_ADDR + '/calibration', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             xhr.onreadystatechange = function () {
@@ -214,7 +236,7 @@
                 }
             };
 
-            xhr.send(JSON.stringify({ height: parseFloat(height) }));
+            xhr.send(JSON.stringify({ height: parseFloat(heightVal) }));
         }
 
         function saveNetwork() {
@@ -224,7 +246,7 @@
             var subnet = document.getElementById('subnet').value;
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/config', true);
+            xhr.open('POST', IP_ADDR + '/config', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             xhr.onreadystatechange = function () {
@@ -234,20 +256,6 @@
             };
 
             xhr.send(JSON.stringify({ wifiSsid: wifiSsid, wifiPass: wifiPass, ip: ip, subnet: subnet }));
-        }
-
-        function sendHeightPreset(height) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/drive/height', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    console.log('Height preset sent successfully.');
-                }
-            };
-
-            xhr.send(JSON.stringify({ height: height }));
         }
     </script>
 

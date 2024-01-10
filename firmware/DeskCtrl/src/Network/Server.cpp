@@ -218,6 +218,8 @@ void HttpServer::Pool()
                     client.println("Content-Type: application/json");
                 }
                 
+                client.println("Access-Control-Allow-Headers: *");
+                client.println("Access-Control-Allow-Methods: *");
                 client.println("Access-Control-Allow-Origin: *");
                 client.println("Connection: close");
                 client.println();

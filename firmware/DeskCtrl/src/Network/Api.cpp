@@ -6,6 +6,11 @@
 
 using namespace ArduinoJson;
 
+static ApiResult Api_OPTIONS_Preflight(const std::string& body)
+{
+    return {200, ""};
+}
+
 static ApiResult Api_GET_WebPage(const std::string& body)
 {
     return {200, GetWebPage(), true};
@@ -19,6 +24,7 @@ static ApiResult Api_GET_Health(const std::string& body)
 
     resp["status"] = "ok";
     resp["height"] = DeskCtrl::GetInstance()->GetMotor().GetHeight();
+    resp["presetsCount"] = 5;
     
     auto arr = resp.createNestedArray("presets");
     arr.add(80.5);
@@ -105,7 +111,6 @@ static ApiResult Api_POST_DriveStop(const std::string& body)
     return {200, ""};
 }
 
-
 Api::Api()
 {
     m_requests.push_back({"GET", "/", Api_GET_WebPage});
@@ -114,6 +119,12 @@ Api::Api()
     m_requests.push_back({"POST", "/drive/height", Api_POST_DriveHeight});
     m_requests.push_back({"POST", "/drive/direction", Api_POST_DriveDirection});
     m_requests.push_back({"POST", "/drive/stop", Api_POST_DriveStop});
+    m_requests.push_back({"OPTIONS", "/", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/health", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/calibration", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/drive/height", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/drive/direction", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/drive/stop", Api_OPTIONS_Preflight});
 }
 
 ApiResult Api::ProcessRequest(const std::string& method, const std::string& path, const std::string& body)
