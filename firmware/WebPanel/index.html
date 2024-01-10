@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desk control</title>
+    <style>
+        /* Add some styling for better layout */
+        body {
+            font-family: Arial, sans-serif;
+            margin-bottom: 20px;
+            background-color: #e0e0e0; /* Light blue background */
+        }
+		
+		button {
+			margin-bottom: 12px;
+			height:20px;
+			width:60px;
+		}
+		
+		input {
+			margin-right: 5px;
+		}
+		
+		label {
+			margin-bottom: 10px;
+		}
+
+		table {
+			table-layout: fixed;
+			width: 150px;
+			margin-bottom: 5px;
+		}
+
+        h1 {
+            margin-bottom: 10px;
+            color: #333; /* Dark text color */
+			font-size: 28px
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #333; /* Dark text color */
+			font-size: 20px
+        }
+
+    </style>
+</head>
+<body onload="initializePage()">
+
+	<h1>Awesome Desk Controller &reg;</h1>
+
+    <h2>Drive manual</h2>
+	<div id="driveManual">
+		<button onclick="driveDirection('up')">&uarr;</button>
+		<br>
+		<button onclick="driveStop()">--</button>
+		<br>
+		<button onclick="driveDirection('down')">&darr;</button>
+	</div>
+	
+    <h2>Drive to</h2>
+	<div id="driveTo">
+		<input type="text" id="driveToEntry">
+		<button onclick="driveDirection('down')">Go</button>
+	</div>
+	
+    <h2>Presets</h2>
+    <div id="presetsColumn">
+    </div>
+    <button onclick="savePresets()">Save</button>
+	
+
+    <h2>Calibration</h2>
+    <div>
+		<table>
+			<tr>
+				<td><label for="calibrateHeight">Height:</label></td>
+				<td><input type="text" id="calibrateHeight"></td>
+			</tr>
+		</table>
+        <button onclick="saveCalibration()">Save</button>
+    </div>
+
+    <h2>Network</h2>
+    <div id="networkSection">
+		<table>
+			<tr>
+				<td><label for="wifiSsid">Wifi ssid:</label></td>
+				<td><input type="text" id="wifiSsid"></td>
+			</tr>
+			<tr>
+				<td><label for="wifiPass">Wifi pass:</label></td>
+				<td><input type="password" id="wifiPass"></td>
+			</tr>
+			<tr>
+				<td><label for="ip">IP:</label></td>
+				<td><input type="text" id="ip"></td>
+			</tr>
+			<tr>
+				<td><label for="subnet">Subnet:</label></td>
+				<td><input type="text" id="subnet"></td>
+			</tr>
+		</table>
+		<button onclick="saveNetwork()">Save</button>
+    </div>
+
+    <script>
+		var IP_ADDR = "http://192.168.0.115"
+	
+        function initializePage() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'http://192.168.0.115/health', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    updateUI(data);
+                }
+            };
+            xhr.send();
+        }
+
+        function updateUI(data) {
+            document.getElementById('calibrateHeight').value = data.height;
+
+            document.getElementById('wifiSsid').value = data.wifiSsid;
+            document.getElementById('wifiPass').value = data.wifiPass;
+            document.getElementById('ip').value = data.ip;
+            document.getElementById('subnet').value = data.subnet;
+
+            // Clear previous entries and buttons
+            var presetsColumn = document.getElementById('presetsColumn');
+            presetsColumn.innerHTML = '';
+
+            // Create entries and buttons for presets
+            data.presets.forEach(function (preset) {
+                var entry = document.createElement('input');
+                entry.type = 'text';
+                entry.value = preset;
+
+                // Add margin-bottom to create space between entries
+           
+                var goButton = document.createElement('button');
+                goButton.innerText = 'Go';
+				goButton.style = "margin-left: 5px"
+                goButton.onclick = function () {
+                    sendHeightPreset(preset);
+                };
+
+                presetsColumn.appendChild(entry);
+                presetsColumn.appendChild(goButton);
+                presetsColumn.appendChild(document.createElement('br'));
+            });
+        }
+
+        function savePresets() {
+            var entries = document.querySelectorAll('#presetsColumn input');
+            var presets = [];
+
+            entries.forEach(function (entry) {
+                presets.push(parseFloat(entry.value));
+            });
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Presets saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ presets: presets }));
+        }
+
+        function driveDirection(direction) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/drive/direction', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Direction sent successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ direction: direction }));
+        }
+
+        function driveStop() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/drive/stop', true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Drive stopped successfully.');
+                }
+            };
+
+            xhr.send();
+        }
+
+        function saveCalibration() {
+            var height = document.getElementById('calibrateHeight').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/calibration', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Calibration saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ height: parseFloat(height) }));
+        }
+
+        function saveNetwork() {
+            var wifiSsid = document.getElementById('wifiSsid').value;
+            var wifiPass = document.getElementById('wifiPass').value;
+            var ip = document.getElementById('ip').value;
+            var subnet = document.getElementById('subnet').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Network configuration saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ wifiSsid: wifiSsid, wifiPass: wifiPass, ip: ip, subnet: subnet }));
+        }
+
+        function sendHeightPreset(height) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/drive/height', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Height preset sent successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ height: height }));
+        }
+    </script>
+
+</body>
+</html>

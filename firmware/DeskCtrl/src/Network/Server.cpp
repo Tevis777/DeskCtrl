@@ -218,6 +218,7 @@ void HttpServer::Pool()
                     client.println("Content-Type: application/json");
                 }
                 
+                client.println("Access-Control-Allow-Origin: *");
                 client.println("Connection: close");
                 client.println();
                 state = EState::RespBody;
