@@ -10,7 +10,9 @@ struct ApiResult
 {
     ApiResult() {};
     ApiResult(uint32_t cd, const std::string& bd) : code(cd), body(bd) {};
+    ApiResult(uint32_t cd, const std::string& bd, bool ht) : code(cd), body(bd), html(ht) {};
 
+    bool html = false;
     uint32_t code = 0;
     std::string body;
 };

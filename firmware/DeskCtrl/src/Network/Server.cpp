@@ -182,7 +182,16 @@ void HttpServer::Pool()
             case EState::Handler:
             {   
                 result = m_api.ProcessRequest(reqMethod, reqPath, reqBody);
-                SYSLOG("Http resp: %u %s", result.code, result.body.c_str());
+
+                if(result.html)
+                {
+                    SYSLOG("Http resp: %u <html>", result.code);
+                }
+                else
+                {
+                    SYSLOG("Http resp: %u %s", result.code, result.body.c_str());
+                }
+                
                 state = EState::RespLine;
                 continue;
             }
@@ -199,7 +208,16 @@ void HttpServer::Pool()
                 char buff[256];
                 snprintf(buff, sizeof(buff), "Content-Length: %u", result.body.length());
                 client.println(buff);
-                client.println("Content-Type: application/json");
+
+                if(result.html)
+                {
+                    client.println("Content-Type: text/html");
+                }
+                else
+                {
+                    client.println("Content-Type: application/json");
+                }
+                
                 client.println("Connection: close");
                 client.println();
                 state = EState::RespBody;

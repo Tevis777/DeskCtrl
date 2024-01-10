@@ -1,17 +1,34 @@
 #include "Api.h"
+#include "WebPage.h"
 #include <ArduinoJson.h>
 #include "../Syslog/Syslog.h"
 #include "../DeskCtrl.h"
 
 using namespace ArduinoJson;
 
+static ApiResult Api_GET_WebPage(const std::string& body)
+{
+    return {200, GetWebPage(), true};
+}
+
+
 static ApiResult Api_GET_Health(const std::string& body)
 {
-    StaticJsonDocument<512> resp;
+    StaticJsonDocument<1024> resp;
     std::string respTxt;
 
     resp["status"] = "ok";
     resp["height"] = DeskCtrl::GetInstance()->GetMotor().GetHeight();
+    
+    auto arr = resp.createNestedArray("presets");
+    arr.add(80.5);
+    arr.add(90.5);
+    arr.add(100.5);
+
+    resp["wifiSsid"] = "yay1";
+    resp["wifiPass"] = "yay2";
+    resp["ip"] = "yay3";
+    resp["subnet"] = "yay4";
 
     serializeJson(resp, respTxt);
 
@@ -91,6 +108,7 @@ static ApiResult Api_POST_DriveStop(const std::string& body)
 
 Api::Api()
 {
+    m_requests.push_back({"GET", "/", Api_GET_WebPage});
     m_requests.push_back({"GET", "/health", Api_GET_Health});
     m_requests.push_back({"POST", "/calibration", Api_POST_Calibration});
     m_requests.push_back({"POST", "/drive/height", Api_POST_DriveHeight});
