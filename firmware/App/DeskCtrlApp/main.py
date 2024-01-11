@@ -10,13 +10,21 @@ from functools import partial
 ICON = Image.open("icon.png")
 ADDR = "192.168.0.115"
 
+PowerThreadAlive = True
 
-def POST(path, body):
+def POST(path, body=None):
     try:
         path = "http://" + ADDR + path
-        body = json.dumps(body)
-        print("GET " + path + " " + body)
-        resp = requests.post(path, data=body)
+        resp = None
+
+        if body is not None:
+            body = json.dumps(body)
+            print("GET " + path + " " + body)
+            resp = requests.post(path, data=body)
+        else:
+            print("GET " + path)
+            resp = requests.post(path)
+
         print(str(resp.status_code) + " " + resp.text)
         return resp
     except:
@@ -34,6 +42,12 @@ def GET(path):
     except:
         print("GET failed")
         return None
+
+
+def PowerTask():
+    while PowerThreadAlive:
+        print("Power thread!")
+        time.sleep(10)
 
 
 def CmdExit(icon, item):
@@ -62,13 +76,16 @@ def Reload(icon, item):
 
     menu = (pystray.MenuItem(text="LeftClick", action=CmdPanel, default=True, visible=False),)
 
+    menu = menu + (pystray.MenuItem("Panel", CmdPanel),)
     menu = menu + (pystray.MenuItem("Reload", Reload),)
+
     menu = menu + (pystray.Menu.SEPARATOR,)
 
     for preset in presets:
         menu = menu + (pystray.MenuItem(str(preset), partial(CmdDriveTo, preset)),)
 
     menu = menu + (pystray.Menu.SEPARATOR,)
+
     menu = menu + (pystray.MenuItem('Exit', CmdExit),)
 
     icon.menu = pystray.Menu(*menu)
@@ -79,4 +96,9 @@ Icon = pystray.Icon("Desk Controller", ICON)
 
 Reload(Icon, None)
 
+#powerThread = threading.Thread(target=PowerTask)
+#powerThread.start()
+#powerThread.join()
+
 Icon.run()
+
