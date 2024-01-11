@@ -10,7 +10,8 @@ from functools import partial
 ICON = Image.open("icon.png")
 ADDR = "192.168.0.115"
 
-PowerThreadAlive = True
+ThreadsAlive = True
+
 
 def POST(path, body=None):
     try:
@@ -44,15 +45,10 @@ def GET(path):
         return None
 
 
-def PowerTask():
-    while PowerThreadAlive:
-        print("Power thread!")
-        time.sleep(10)
-
-
 def CmdExit(icon, item):
     print("CMD: Exit")
     icon.stop()
+    ThreadsAlive = False
 
 
 def CmdPanel(icon, item):
@@ -96,9 +92,20 @@ Icon = pystray.Icon("Desk Controller", ICON)
 
 Reload(Icon, None)
 
-#powerThread = threading.Thread(target=PowerTask)
-#powerThread.start()
-#powerThread.join()
 
-Icon.run()
+def PowerTask():
+    while ThreadsAlive:
+        print("Power thread!")
+        time.sleep(10)
 
+
+def TrayTask():
+    Icon.run()
+
+
+powerThread = threading.Thread(target=PowerTask)
+trayThread = threading.Thread(target=TrayTask)
+powerThread.start()
+trayThread.start()
+powerThread.join()
+trayThread.join()
