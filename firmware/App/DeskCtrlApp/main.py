@@ -5,85 +5,78 @@ import requests
 import json
 import time
 import webbrowser
+from functools import partial
 
 ICON = Image.open("icon.png")
 ADDR = "192.168.0.115"
 
-Active = True
-Mutex = threading.Lock()
-Tray = pystray.Icon("GFG", ICON, "Desk Controller", menu=pystray.Menu())
 
-
-def AppIsActive():
-    global Active
-    Mutex.acquire()
-    active = Active
-    Mutex.release()
-    return active
-
-
-def AppExit():
-    global Active
-    Tray.stop()
-    Mutex.acquire()
-    Active = False
-    Mutex.release()
-
-
-def CmdDriveTo(height):
+def POST(path, body):
     try:
-        data = {"height": height}
-        requests.post("http://" + ADDR + "/drive/height", data=json.dumps(data))
+        path = "http://" + ADDR + path
+        body = json.dumps(body)
+        print("GET " + path + " " + body)
+        resp = requests.post(path, data=body)
+        print(str(resp.status_code) + " " + resp.text)
+        return resp
     except:
-        print("Drive error")
+        print("POST failed")
+        return None
 
 
-def CmdPanel():
+def GET(path):
+    try:
+        path = "http://" + ADDR + path
+        print("GET " + path)
+        resp = requests.get(path)
+        print(str(resp.status_code) + " " + resp.text)
+        return resp
+    except:
+        print("GET failed")
+        return None
+
+
+def CmdExit(icon, item):
+    print("CMD: Exit")
+    icon.stop()
+
+
+def CmdPanel(icon, item):
+    print("CMD: Panel")
     webbrowser.open("http://" + ADDR)
 
 
-def Reload():
-    # try:
-    print("Request GET /health")
-    resp = requests.get("http://" + ADDR + "/health")
-    print("Response " + str(resp.status_code) + " " + resp.text)
-
-    data = json.loads(resp.text)
-
-    items = []
-    items = items + [pystray.MenuItem("Panel", CmdPanel)]
-    items = items + [pystray.Menu.SEPARATOR]
-
-    for preset in data["presets"]:
-        items = items + [pystray.MenuItem(str(preset), CmdPanel)]
-
-    items = items + [pystray.Menu.SEPARATOR]
-    items = items + [pystray.MenuItem("Exit", AppExit)]
-
-    Tray.menu = tuple(items)
-    print("Reload ok")
-    # except:
-    print("Reload failure")
+def CmdDriveTo(height, icon, item):
+    return POST("/drive/height", {"height": height})
 
 
-def TrayTask():
-    global Tray
-    Reload()
-    Tray.run()
-    pass
+def Reload(icon, item):
+    presets = []
+
+    try:
+        resp = GET("/health")
+        data = json.loads(resp.text)
+        presets = data["presets"]
+    except:
+        pass
+
+    menu = (pystray.MenuItem(text="LeftClick", action=CmdPanel, default=True, visible=False),)
+
+    menu = menu + (pystray.MenuItem("Reload", Reload),)
+    menu = menu + (pystray.Menu.SEPARATOR,)
+
+    for preset in presets:
+        menu = menu + (pystray.MenuItem(str(preset), partial(CmdDriveTo, preset)),)
+
+    menu = menu + (pystray.Menu.SEPARATOR,)
+    menu = menu + (pystray.MenuItem('Exit', CmdExit),)
+
+    icon.menu = pystray.Menu(*menu)
 
 
-def PowerTask():
-    while AppIsActive():
-        print("Power task!")
-        time.sleep(10)
+# Create the icon
+Icon = pystray.Icon("Desk Controller", ICON)
 
+Reload(Icon, None)
 
-trayThread = threading.Thread(target=TrayTask)
-powerThread = threading.Thread(target=PowerTask)
-
-trayThread.start()
-powerThread.start()
-
-trayThread.join()
-powerThread.join()
+Icon.run()
