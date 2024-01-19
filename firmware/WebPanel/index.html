@@ -59,7 +59,7 @@
 		<br>
 		<button onclick="driveDirection('down')" style="width: 100px; height: 25px">&darr;</button>
 	</div>
-	
+
     <h2>Drive to</h2>
 	<div id="driveTo">
 		<input type="text" id="driveToEntry">
@@ -75,35 +75,80 @@
     <div>
 		<table>
 			<tr>
-				<td><label for="heightEntry">Height:</label></td>
-				<td><input type="text" id="heightEntry"></td>
+				<td><label for="eHeight">Height:</label></td>
+				<td><input type="text" id="eHeight"></td>
 			</tr>
 		</table>
         <button onclick="saveCalibration()" style="width: 100px">Save</button>
     </div>
 
-    <h2>Network</h2>
-    <div id="networkSection">
+    <h2>Power</h2>
+    <div>
 		<table>
 			<tr>
-				<td><label for="wifiSsidEntry">Wifi ssid:</label></td>
-				<td><input type="text" id="wifiSsidEntry"></td>
+				<td><label for="ePowerTimeout">Timeout:</label></td>
+				<td><input type="text" id="ePowerTimeout"></td>
+			</tr>
+		</table>
+        <button onclick="saveCalibration()" style="width: 100px">Save</button>
+    </div>
+
+    <h2>Wifi STA</h2>
+    <div id="staSection">
+		<table>
+			<tr>
+				<td><label for="eStaSsid">Ssid:</label></td>
+				<td><input type="text" id="eStaSsid"></td>
 			</tr>
 			<tr>
-				<td><label for="wifiPassEntry">Wifi pass:</label></td>
-				<td><input type="password" id="wifiPassEntry"></td>
+				<td><label for="eStaPass">Pass:</label></td>
+				<td><input type="password" id="eStaPass"></td>
 			</tr>
 			<tr>
-				<td><label for="ipEntry">IP:</label></td>
-				<td><input type="text" id="ipEntry"></td>
+				<td><label for="eStaIp">Address:</label></td>
+				<td><input type="text" id="eStaIp"></td>
 			</tr>
 			<tr>
-				<td><label for="subnetEntry">Subnet:</label></td>
-				<td><input type="text" id="subnetEntry"></td>
+				<td><label for="eStaGateway">Gateway:</label></td>
+				<td><input type="text" id="eStaGateway"></td>
+			</tr>
+			<tr>
+				<td><label for="eStaSubnet">Subnet:</label></td>
+				<td><input type="text" id="eStaSubnet"></td>
 			</tr>
 		</table>
 		<button onclick="saveNetwork()" style="width: 100px">Save</button>
     </div>
+	
+    <h2>Wifi AP</h2>
+    <div id="apSection">
+		<table>
+			<tr>
+				<td><label for="eApSsid">Ssid:</label></td>
+				<td><input type="text" id="eApSsid"></td>
+			</tr>
+			<tr>
+				<td><label for="eStaPass">Pass:</label></td>
+				<td><input type="password" id="eApPass"></td>
+			</tr>
+			<tr>
+				<td><label for="eStaIp">Address:</label></td>
+				<td><input type="text" id="eApIp"></td>
+			</tr>
+			<tr>
+				<td><label for="eStaGateway">Gateway:</label></td>
+				<td><input type="text" id="eApGateway"></td>
+			</tr>
+			<tr>
+				<td><label for="eStaSubnet">Subnet:</label></td>
+				<td><input type="text" id="eApSubnet"></td>
+			</tr>
+		</table>
+		<button onclick="saveNetwork()" style="width: 100px">Save</button>
+    </div>
+	
+	
+	
 
     <script>
 		var IP_ADDR = "http://192.168.0.115"
@@ -121,15 +166,27 @@
         }
 
         function updateUI(data) {
-            document.getElementById('heightEntry').value = data.height;
-            document.getElementById('wifiSsidEntry').value = data.wifiSsid;
-            document.getElementById('wifiPassEntry').value = data.wifiPass;
-            document.getElementById('ipEntry').value = data.ip;
-            document.getElementById('subnetEntry').value = data.subnet;
+            document.getElementById('eHeight').value = data.status.height;
+			
+			document.getElementById('ePowerTimeout').value = data.config.power.timeout;
+			
+            document.getElementById('eStaSsid').value = data.config.wifiSTA.ssid;
+            document.getElementById('eStaPass').value = data.config.wifiSTA.pass;
+            document.getElementById('eStaIp').value = data.config.wifiSTA.ip;
+            document.getElementById('eStaGateway').value = data.config.wifiSTA.gateway;
+			document.getElementById('eStaSubnet').value = data.config.wifiSTA.subnet;
+			
+            document.getElementById('eApSsid').value = data.config.wifiAP.ssid;
+            document.getElementById('eApPass').value = data.config.wifiAP.pass;
+            document.getElementById('eApIp').value = data.config.wifiAP.ip;
+            document.getElementById('eApGateway').value = data.config.wifiAP.gateway;
+			document.getElementById('eApSubnet').value = data.config.wifiAP.subnet;
+			
+			
 			
 			var presetsColumn = document.getElementById('presetsColumn');
-			var presetCnt = data.presetsCount;
-			var presets = data.presets;
+			var presetCnt = data.config.drive.presetsMax;
+			var presets = data.config.drive.presets;
 
             presetsColumn.innerHTML = '';
 			
@@ -166,6 +223,7 @@
             var presets = [];
 
             entries.forEach(function (entry) {
+			
                 presets.push(parseFloat(entry.value));
             });
 
