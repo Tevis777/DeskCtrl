@@ -90,7 +90,7 @@
 				<td><input type="text" id="ePowerTimeout"></td>
 			</tr>
 		</table>
-        <button onclick="saveCalibration()" style="width: 100px">Save</button>
+        <button onclick="savePower()" style="width: 100px">Save</button>
     </div>
 
     <h2>Wifi STA</h2>
@@ -117,7 +117,7 @@
 				<td><input type="text" id="eStaSubnet"></td>
 			</tr>
 		</table>
-		<button onclick="saveNetwork()" style="width: 100px">Save</button>
+		<button onclick="saveSTA()" style="width: 100px">Save</button>
     </div>
 	
     <h2>Wifi AP</h2>
@@ -144,7 +144,7 @@
 				<td><input type="text" id="eApSubnet"></td>
 			</tr>
 		</table>
-		<button onclick="saveNetwork()" style="width: 100px">Save</button>
+		<button onclick="saveAP()" style="width: 100px">Save</button>
     </div>
 	
 	
@@ -218,28 +218,6 @@
 			}
         }
 
-        function savePresets() {
-            var entries = document.querySelectorAll('#presetsColumn input');
-            var presets = [];
-
-            entries.forEach(function (entry) {
-			
-                presets.push(parseFloat(entry.value));
-            });
-
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', IP_ADDR + '/config', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    console.log('Presets saved successfully.');
-                }
-            };
-
-            xhr.send(JSON.stringify({ presets: presets }));
-        }
-
         function driveTo(source) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', IP_ADDR + '/drive/height', true);
@@ -280,12 +258,34 @@
 
             xhr.send();
         }
+		
+        function savePresets() {
+            var entries = document.querySelectorAll('#presetsColumn input');
+            var presets = [];
 
-        function saveCalibration() {
-            var heightVal = document.getElementById('calibrateHeight').value;
+            entries.forEach(function (entry) {
+			
+                presets.push(parseFloat(entry.value));
+            });
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', IP_ADDR + '/calibration', true);
+            xhr.open('POST', IP_ADDR + '/config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Presets saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ config: {drive: {presets: presets}} }));
+        }
+
+        function saveCalibration() {
+            var heightVal = document.getElementById('eHeight').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', IP_ADDR + '/drive/calibration', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             xhr.onreadystatechange = function () {
@@ -296,12 +296,30 @@
 
             xhr.send(JSON.stringify({ height: parseFloat(heightVal) }));
         }
+		
+        function savePower() {
+            var timeoutVal = document.getElementById('ePowerTimeout').value;
 
-        function saveNetwork() {
-            var wifiSsid = document.getElementById('wifiSsid').value;
-            var wifiPass = document.getElementById('wifiPass').value;
-            var ip = document.getElementById('ip').value;
-            var subnet = document.getElementById('subnet').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', IP_ADDR + '/config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Power saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({ config: {power: {timeout: timeoutVal}} }));
+        }
+		
+
+        function saveSTA() {
+            var ssid = document.getElementById('eStaSsid').value;
+            var pass = document.getElementById('eStaPass').value;
+            var addr = document.getElementById('eStaIp').value;
+			var gateway = document.getElementById('eStaGateway').value;
+            var subnet = document.getElementById('eStaSubnet').value;
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', IP_ADDR + '/config', true);
@@ -313,8 +331,29 @@
                 }
             };
 
-            xhr.send(JSON.stringify({ wifiSsid: wifiSsid, wifiPass: wifiPass, ip: ip, subnet: subnet }));
+            xhr.send(JSON.stringify({config:{wifiSTA:{ ssid: ssid, pass: pass, ip: addr, gateway: gateway, subnet: subnet }}}));
         }
+		
+        function saveAP() {
+            var ssid = document.getElementById('eApSsid').value;
+            var pass = document.getElementById('eApPass').value;
+            var addr = document.getElementById('eApIp').value;
+			var gateway = document.getElementById('eApGateway').value;
+            var subnet = document.getElementById('eApSubnet').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', IP_ADDR + '/config', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Network configuration saved successfully.');
+                }
+            };
+
+            xhr.send(JSON.stringify({config:{wifiAP:{ ssid: ssid, pass: pass, ip: addr, gateway: gateway, subnet: subnet }}}));
+        }
+		
     </script>
 
 </body>

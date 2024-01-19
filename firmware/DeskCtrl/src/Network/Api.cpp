@@ -120,8 +120,13 @@ static ApiResult Api_POST_Config(const std::string& body)
 
             for (JsonVariant value : obj["presets"].as<JsonArray>())
             {   
+                if(value == nullptr)
+                    continue;
+
                 config.drive.presets.push_back(value);
             }
+
+            std::sort(config.drive.presets.begin(), config.drive.presets.end());
         }       
     }
 
