@@ -248,7 +248,7 @@ void DeskCtrl::CmdDeskCalibrate(Motor::Height height)
     m_storage.SavePosition(Motor::HeightToSteps(height));
 }
 
-void DeskCtrl::CmdResetConfig()
+void DeskCtrl::CmdConfigReset()
 {
     m_config.wifiSTA.ssid = "UPC2012";
     m_config.wifiSTA.pass = "LubiePlacki666";
@@ -266,6 +266,11 @@ void DeskCtrl::CmdResetConfig()
 
     m_config.drive.presets = {80, 95, 120};
 
+    m_storage.SaveConfig(m_config);
+}
+
+void DeskCtrl::CmdConfigSave()
+{
     m_storage.SaveConfig(m_config);
 }
 

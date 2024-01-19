@@ -37,7 +37,9 @@ public:
     void CmdDeskGoTo(Motor::Height height);
     void CmdDeskStop();
     void CmdDeskCalibrate(Motor::Height height);
-    void CmdResetConfig();
+    void CmdConfigReset();
+    void CmdConfigSave();
+    
 
     Motor& GetMotor();
     MotorPower& GetMotorPower();

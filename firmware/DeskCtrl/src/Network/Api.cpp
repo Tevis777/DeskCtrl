@@ -20,7 +20,7 @@ static ApiResult Api_GET_WebPage(const std::string& body)
 
 static ApiResult Api_GET_Health(const std::string& body)
 {
-    StaticJsonDocument<1024> resp;
+    StaticJsonDocument<1024> root;
     std::string respTxt;
 
     //Obtain data to access
@@ -28,12 +28,12 @@ static ApiResult Api_GET_Health(const std::string& body)
     auto& motor = DeskCtrl::GetInstance()->GetMotor();
   
     //Status
-    auto statusObj = resp.createNestedObject("status");
+    auto statusObj = root.createNestedObject("status");
     statusObj["height"] = std::round(motor.GetHeight() * 100.0) / 100.0;
 
 
     //Config
-    auto configObj = resp.createNestedObject("config");
+    auto configObj = root.createNestedObject("config");
 
     auto staObj = configObj.createNestedObject("wifiSTA");
     staObj["ssid"] = config.wifiSTA.ssid;
@@ -64,12 +64,73 @@ static ApiResult Api_GET_Health(const std::string& body)
         presetArr.add(preset);
     }
 
-    serializeJson(resp, respTxt);
+    serializeJson(root, respTxt);
 
     return {200, respTxt};
 }
 
-static ApiResult Api_POST_Calibration(const std::string& body)
+static ApiResult Api_POST_Config(const std::string& body)
+{
+    StaticJsonDocument<1024> root;
+
+    auto res = deserializeJson(root, body);
+
+    if(res != DeserializationError::Code::Ok)
+        return {400, ""};
+
+    auto& config = DeskCtrl::GetInstance()->GetConfig();
+
+    auto configObj = root["config"].as<JsonObject>();
+
+    if(configObj.containsKey("wifiSTA"))
+    {
+        auto obj = configObj["wifiSTA"].as<JsonObject>();
+        if(obj.containsKey("ssid"))     config.wifiSTA.ssid     = obj["ssid"].as<std::string>();
+        if(obj.containsKey("pass"))     config.wifiSTA.pass     = obj["pass"].as<std::string>();
+        if(obj.containsKey("ip"))       config.wifiSTA.ip       = obj["ip"].as<std::string>();
+        if(obj.containsKey("gateway"))  config.wifiSTA.gateway  = obj["gateway"].as<std::string>();
+        if(obj.containsKey("subnet"))   config.wifiSTA.subnet   = obj["subnet"].as<std::string>();
+    }
+
+    if(configObj.containsKey("wifiAP"))
+    {
+        auto obj = configObj["wifiAP"].as<JsonObject>();
+        if(obj.containsKey("ssid"))     config.wifiAP.ssid     = obj["ssid"].as<std::string>();
+        if(obj.containsKey("pass"))     config.wifiAP.pass     = obj["pass"].as<std::string>();
+        if(obj.containsKey("ip"))       config.wifiAP.ip       = obj["ip"].as<std::string>();
+        if(obj.containsKey("gateway"))  config.wifiAP.gateway  = obj["gateway"].as<std::string>();
+        if(obj.containsKey("subnet"))   config.wifiAP.subnet   = obj["subnet"].as<std::string>();
+    }
+
+    if(configObj.containsKey("power"))
+    {
+        auto obj = configObj["power"].as<JsonObject>();
+
+        if(obj.containsKey("timeout"))
+            config.power.timeout = obj["timeout"].as<uint32_t>();
+    }
+
+    if(configObj.containsKey("drive"))
+    {
+        auto obj = configObj["drive"].as<JsonObject>();
+
+        if(obj.containsKey("presets"))
+        {
+            config.drive.presets.clear();
+
+            for (JsonVariant value : obj["presets"].as<JsonArray>())
+            {   
+                config.drive.presets.push_back(value);
+            }
+        }       
+    }
+
+    DeskCtrl::GetInstance()->CmdConfigSave();
+
+    return {200, ""};
+}
+
+static ApiResult Api_POST_DriveCalibration(const std::string& body)
 {
     StaticJsonDocument<256> req;
 
@@ -143,13 +204,15 @@ Api::Api()
 {
     m_requests.push_back({"GET", "/", Api_GET_WebPage});
     m_requests.push_back({"GET", "/health", Api_GET_Health});
-    m_requests.push_back({"POST", "/calibration", Api_POST_Calibration});
+    m_requests.push_back({"POST", "/config", Api_POST_Config});
+    m_requests.push_back({"POST", "/drive/calibration", Api_POST_DriveCalibration});
     m_requests.push_back({"POST", "/drive/height", Api_POST_DriveHeight});
     m_requests.push_back({"POST", "/drive/direction", Api_POST_DriveDirection});
     m_requests.push_back({"POST", "/drive/stop", Api_POST_DriveStop});
     m_requests.push_back({"OPTIONS", "/", Api_OPTIONS_Preflight});
     m_requests.push_back({"OPTIONS", "/health", Api_OPTIONS_Preflight});
-    m_requests.push_back({"OPTIONS", "/calibration", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/config", Api_OPTIONS_Preflight});
+    m_requests.push_back({"OPTIONS", "/drive/calibration", Api_OPTIONS_Preflight});
     m_requests.push_back({"OPTIONS", "/drive/height", Api_OPTIONS_Preflight});
     m_requests.push_back({"OPTIONS", "/drive/direction", Api_OPTIONS_Preflight});
     m_requests.push_back({"OPTIONS", "/drive/stop", Api_OPTIONS_Preflight});
