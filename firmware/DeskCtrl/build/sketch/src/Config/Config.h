@@ -4,29 +4,37 @@
 
 #include <vector>
 #include <stdint.h>
+#include <string>
 
-class Config
+struct Config
 {
-public:
-    struct Data
+
+    static constexpr uint32_t MAX_PRESETS = 5;
+
+
+    struct Wifi
     {
-
-        char wifiSsid[32];
-        char wifiPass[32];
-        char wifiIp[24];
-        char wifiGateway[24];
-        char wifiSubnet[24];
-        uint32_t presets[10];
-
-
+        std::string ssid;
+        std::string pass;
+        std::string ip;
+        std::string gateway;
+        std::string subnet;
     };
 
-    Data data;
+    struct Power
+    {
+        uint32_t timeout; //[min]
+    };
 
-    // void Save();
-    // void Load();
-private:
+    struct Drive
+    {
+        std::vector<uint32_t> presets; //[cm]
+    };
 
+    Wifi wifiAP;
+    Wifi wifiSTA;
+    Power power;
+    Drive drive;
 };
 
 #endif //_CONFIG_H_

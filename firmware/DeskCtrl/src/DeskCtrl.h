@@ -8,6 +8,7 @@
 #include "Syslog/Syslog.h"
 #include "Storage/Storage.h"
 #include "Network/Network.h"
+#include "Config/Config.h"
 
 #include <vector>
 
@@ -36,13 +37,17 @@ public:
     void CmdDeskGoTo(Motor::Height height);
     void CmdDeskStop();
     void CmdDeskCalibrate(Motor::Height height);
+    void CmdResetConfig();
 
     Motor& GetMotor();
     MotorPower& GetMotorPower();
     Network& GetNetwork();
+    Config& GetConfig();
 
 private:
     static DeskCtrl* s_instance;
+
+    Config m_config;
     Led m_ledBoard;
     Button m_buttonUp;
     Button m_buttonDown;

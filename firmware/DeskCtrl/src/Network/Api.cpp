@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include "../Syslog/Syslog.h"
 #include "../DeskCtrl.h"
+#include <cmath>
 
 using namespace ArduinoJson;
 
@@ -22,19 +23,46 @@ static ApiResult Api_GET_Health(const std::string& body)
     StaticJsonDocument<1024> resp;
     std::string respTxt;
 
-    resp["status"] = "ok";
-    resp["height"] = DeskCtrl::GetInstance()->GetMotor().GetHeight();
-    resp["presetsCount"] = 5;
-    
-    auto arr = resp.createNestedArray("presets");
-    arr.add(80.5);
-    arr.add(90.5);
-    arr.add(100.5);
+    //Obtain data to access
+    auto& config = DeskCtrl::GetInstance()->GetConfig();
+    auto& motor = DeskCtrl::GetInstance()->GetMotor();
+  
+    //Status
+    auto statusObj = resp.createNestedObject("status");
+    statusObj["height"] = std::round(motor.GetHeight() * 100.0) / 100.0;
 
-    resp["wifiSsid"] = "yay1";
-    resp["wifiPass"] = "yay2";
-    resp["ip"] = "yay3";
-    resp["subnet"] = "yay4";
+
+    //Config
+    auto configObj = resp.createNestedObject("config");
+
+    auto staObj = configObj.createNestedObject("wifiSTA");
+    staObj["ssid"] = config.wifiSTA.ssid;
+    staObj["pass"] = config.wifiSTA.pass;
+    staObj["ip"] = config.wifiSTA.ip;
+    staObj["gateway"] = config.wifiSTA.gateway;
+    staObj["subnet"] = config.wifiSTA.subnet;
+
+
+    auto apObj = configObj.createNestedObject("wifiAP");
+    apObj["ssid"] = config.wifiAP.ssid;
+    apObj["pass"] = config.wifiAP.pass;
+    apObj["ip"] = config.wifiAP.ip;
+    apObj["gateway"] = config.wifiAP.gateway;
+    apObj["subnet"] = config.wifiAP.subnet;
+
+    auto powerObj = configObj.createNestedObject("power");
+    powerObj["timeout"] = config.power.timeout;
+
+    auto driveObj = configObj.createNestedObject("drive");
+
+    driveObj["presetsMax"] = Config::MAX_PRESETS;
+
+    auto presetArr = driveObj.createNestedArray("presets");
+
+    for(const auto& preset : config.drive.presets)
+    {
+        presetArr.add(preset);
+    }
 
     serializeJson(resp, respTxt);
 

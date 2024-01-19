@@ -32,6 +32,7 @@ DeskCtrl* DeskCtrl::GetInstance()
 /*****************************************************************************************************************/
 /*                                                     INIT                                                      */
 /*****************************************************************************************************************/
+
 void DeskCtrl::Init()
 {
   SyslogInit();
@@ -43,7 +44,10 @@ void DeskCtrl::Init()
 
   uint32_t position;
 
+  //CmdResetConfig();
+
   m_storage.LoadPosition(position);
+  m_storage.LoadConfig(m_config);
   
   m_motorPower.Init(PIN_MOTOR_POWER);
   m_motorPower.On();
@@ -78,6 +82,26 @@ void DeskCtrl::Init()
     m_presets.push_back(80);
     m_presets.push_back(95);
     m_presets.push_back(115);
+
+    SYSLOG("Config:");
+    SYSLOG("Wifi STA ssid:%s, pass:%s, ip:%s, gateway:%s, subnet:%s", m_config.wifiSTA.ssid.c_str(), 
+                                                                      m_config.wifiSTA.pass.c_str(), 
+                                                                      m_config.wifiSTA.ip.c_str(),
+                                                                      m_config.wifiSTA.gateway.c_str(), 
+                                                                      m_config.wifiSTA.subnet.c_str());
+
+    SYSLOG("Wifi AP ssid:%s, pass:%s, ip:%s, gateway:%s, subnet:%s", m_config.wifiAP.ssid.c_str(), 
+                                                                     m_config.wifiAP.pass.c_str(), 
+                                                                     m_config.wifiAP.ip.c_str(),
+                                                                     m_config.wifiAP.gateway.c_str(), 
+                                                                     m_config.wifiAP.subnet.c_str());
+
+    SYSLOG("Power timeout: %u", m_config.power.timeout);
+
+    for(const auto& preset : m_config.drive.presets)
+    {
+        SYSLOG("Preset: %u", preset);
+    }    
 }
 
 /*****************************************************************************************************************/
@@ -224,6 +248,27 @@ void DeskCtrl::CmdDeskCalibrate(Motor::Height height)
     m_storage.SavePosition(Motor::HeightToSteps(height));
 }
 
+void DeskCtrl::CmdResetConfig()
+{
+    m_config.wifiSTA.ssid = "UPC2012";
+    m_config.wifiSTA.pass = "LubiePlacki666";
+    m_config.wifiSTA.ip = "192.168.0.115";
+    m_config.wifiSTA.gateway = "192.168.0.1";
+    m_config.wifiSTA.subnet = "255.255.255.0";
+
+    m_config.wifiAP.ssid = "DeskCtrl";
+    m_config.wifiAP.pass = "LubiePlacki666";
+    m_config.wifiAP.ip = "192.168.10.1";
+    m_config.wifiAP.gateway = "192.168.10.1";
+    m_config.wifiAP.subnet = "255.255.255.0";
+
+    m_config.power.timeout = 60;
+
+    m_config.drive.presets = {80, 95, 120};
+
+    m_storage.SaveConfig(m_config);
+}
+
 /*****************************************************************************************************************/
 /*                                                   GETTERS                                                     */
 /*****************************************************************************************************************/
@@ -240,4 +285,9 @@ MotorPower& DeskCtrl::GetMotorPower()
 Network& DeskCtrl::GetNetwork()
 {
     return m_network;
+}
+
+Config& DeskCtrl::GetConfig()
+{
+    return m_config;
 }
