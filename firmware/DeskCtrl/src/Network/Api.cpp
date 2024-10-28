@@ -17,7 +17,6 @@ static ApiResult Api_GET_WebPage(const std::string& body)
     return {200, GetWebPage(), true};
 }
 
-
 static ApiResult Api_GET_Health(const std::string& body)
 {
     StaticJsonDocument<1024> root;
@@ -67,6 +66,13 @@ static ApiResult Api_GET_Health(const std::string& body)
     serializeJson(root, respTxt);
 
     return {200, respTxt};
+}
+
+static ApiResult Api_POST_Restart(const std::string& body)
+{
+    DeskCtrl::GetInstance()->CmdDeskStop();
+    ESP.restart();
+    return {200, ""};
 }
 
 static ApiResult Api_POST_Config(const std::string& body)
@@ -209,6 +215,7 @@ Api::Api()
 {
     m_requests.push_back({"GET", "/", Api_GET_WebPage});
     m_requests.push_back({"GET", "/health", Api_GET_Health});
+    m_requests.push_back({"POST", "/restart", Api_POST_Restart});
     m_requests.push_back({"POST", "/config", Api_POST_Config});
     m_requests.push_back({"POST", "/drive/calibration", Api_POST_DriveCalibration});
     m_requests.push_back({"POST", "/drive/height", Api_POST_DriveHeight});

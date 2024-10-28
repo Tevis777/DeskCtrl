@@ -66,7 +66,7 @@ def Reload(icon, item):
     try:
         resp = GET("/health")
         data = json.loads(resp.text)
-        presets = data["presets"]
+        presets = data["config"]["drive"]["presets"]
     except:
         pass
 

@@ -63,7 +63,7 @@
     <h2>Drive to</h2>
 	<div id="driveTo">
 		<input type="text" id="driveToEntry">
-		<button onclick="driveTo(-1)">Go</button>
+		<button onclick="driveTo(document.getElementById('driveToEntry').value)">Go</button>
 	</div>
 	
     <h2>Presets</h2>
@@ -148,10 +148,14 @@
     </div>
 	
 	
-	
+    <h2>Maintenance</h2>
+	<div id="driveTo">
+		<button onclick="restart()" style="width: 100px">Restart</button>
+	</div>
 
     <script>
-		var IP_ADDR = "http://192.168.0.115"
+		//var IP_ADDR = "http://192.168.0.115"
+		var IP_ADDR = ""
 	
         function reload() {
             var xhr = new XMLHttpRequest();
@@ -203,7 +207,7 @@
 					goButton.innerText = 'Go';
 					goButton.style = "margin-left: 5px"
 					goButton.onclick = function () {
-						driveTo(i);
+						driveTo(presets[i]);
 					};
 				}
 				
@@ -217,8 +221,21 @@
 				presetsColumn.appendChild(document.createElement('br'));
 			}
         }
+		
+		function restart() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', IP_ADDR + '/restart', true);
 
-        function driveTo(source) {
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    console.log('Restart request sent.');
+                }
+            };
+
+            xhr.send();
+		}
+
+        function driveTo(height) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', IP_ADDR + '/drive/height', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
